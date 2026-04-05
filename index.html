@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LatencyGrid — Voice AI Pipeline Latency Benchmarks</title>
+  <meta name="description" content="Benchmark your full STT→LLM→TTS voice pipeline. Measure TTFT, time to first audio byte, P50/P95/P99. Open source, CI-ready, one pip install." />
+
+  <!-- OG / Twitter Card -->
+  <meta property="og:title" content="LatencyGrid — Voice AI Pipeline Latency Benchmarks" />
+  <meta property="og:description" content="Benchmark your full STT→LLM→TTS voice pipeline. Measure TTFT, time to first audio byte, P50/P95/P99. Open source, CI-ready, one pip install." />
+  <meta property="og:url" content="https://latencygrid.dev" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://latencygrid.dev/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="LatencyGrid — Voice AI Pipeline Latency Benchmarks" />
+  <meta name="twitter:description" content="Benchmark your full STT→LLM→TTS voice pipeline. Measure TTFT, time to first audio byte, P50/P95/P99. Open source, CI-ready, one pip install." />
+  <meta name="twitter:image" content="https://latencygrid.dev/og-image.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ═══════════════════════════════════════════
+       HERO
+  ════════════════════════════════════════════ -->
+  <section class="hero">
+    <nav class="nav">
+      <span class="nav-logo">LatencyGrid</span>
+      <div class="nav-links">
+        <a href="#roadmap">Roadmap</a>
+        <a href="#quickstart">Docs</a>
+        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </nav>
+
+    <div class="hero-content">
+      <div class="hero-badge">Open Source · MIT License</div>
+      <h1 class="hero-title">
+        <span class="wordmark">LatencyGrid</span>
+      </h1>
+      <p class="hero-tagline">⚡ Benchmark your entire voice AI stack</p>
+      <p class="hero-sub">Measure latency across your full STT → LLM → TTS pipeline. TTFT, time to first audio byte, P50/P95/P99. One tool, every major provider.</p>
+
+      <div class="hero-ctas">
+        <div class="pip-cmd" id="pip-cmd" title="Click to copy">
+          <span class="pip-prompt">$</span>
+          <span class="pip-text">pip install modelping</span>
+          <button class="copy-btn" onclick="copyPip()" aria-label="Copy command">
+            <svg id="copy-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
+            <svg id="check-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener" class="btn-github">
+          View on GitHub
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </a>
+      </div>
+
+      <!-- Animated terminal in hero -->
+      <div class="hero-terminal">
+        <div class="terminal-bar">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green-dot"></span>
+          <span class="terminal-title">modelping — zsh</span>
+        </div>
+        <div class="terminal-body hero-term-body">
+          <div class="typewriter-wrap">
+            <span class="term-prompt">$ </span><span class="typewriter">modelping pipeline --stt groq-whisper-large-v3 --llm gpt-4o-mini --tts cartesia-sonic-2</span><span class="cursor">█</span>
+          </div>
+          <div class="term-output" id="term-output">
+            <div class="term-line fade-in" style="--d:0.8s">╭──────────────────────────────────────────────────────────────╮</div>
+            <div class="term-line fade-in" style="--d:0.9s">│  <span class="accent">modelping pipeline</span>  •  3 runs                            │</div>
+            <div class="term-line fade-in" style="--d:1.0s">╰──────────────────────────────────────────────────────────────╯</div>
+            <div class="term-line fade-in" style="--d:1.1s">&nbsp;</div>
+            <div class="term-line fade-in header-row" style="--d:1.2s"> STT                LLM             TTS          STT   LLM   TTS   Total</div>
+            <div class="term-line fade-in" style="--d:1.3s"> ────────────────────────────────────────────────────────────────────</div>
+            <div class="term-line fade-in row-fast" style="--d:1.5s"> groq/whisper-v3    groq/llama-70b  cartesia      182ms  44ms  91ms  <span class="accent">317ms</span></div>
+            <div class="term-line fade-in" style="--d:2.1s">&nbsp;</div>
+            <div class="term-line fade-in row-success" style="--d:2.3s">✓ Pipeline tested  •  fastest total: 317ms</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       BENCHMARK LEADERBOARD
+  ════════════════════════════════════════════ -->
+  <section class="section leaderboard-section" id="leaderboard">
+    <div class="container leaderboard-container">
+      <h2 class="section-title">Benchmark Results</h2>
+      <p class="section-sub">
+        Real measurements. No synthetic tests. Run with modelping.
+        <a href="#quickstart" class="section-sub-link">Run your own →</a>
+      </p>
+
+      <!-- Metadata badges -->
+      <div class="lb-meta">
+        <span class="lb-meta-badge">📍 Ottawa, Canada</span>
+        <span class="lb-meta-badge">🗓 April 5, 2026</span>
+        <span class="lb-meta-badge">5 runs per model</span>
+        <span class="lb-meta-badge">modelping v0.1.0</span>
+      </div>
+
+      <!-- Tabs -->
+      <div class="lb-tabs" role="tablist">
+        <button class="lb-tab active" data-tab="llm" role="tab" aria-selected="true">LLM</button>
+        <button class="lb-tab" data-tab="stt" role="tab" aria-selected="false">STT</button>
+        <button class="lb-tab" data-tab="tts" role="tab" aria-selected="false">TTS</button>
+        <button class="lb-tab" data-tab="pipeline" role="tab" aria-selected="false">Pipeline</button>
+      </div>
+
+      <!-- ── LLM Tab ── -->
+      <div class="lb-panel" id="tab-llm">
+        <div class="lb-table-wrap">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Provider</th>
+                <th class="lb-th-num">TTFT P50</th>
+                <th class="lb-th-num">TTFT P95</th>
+                <th class="lb-th-num">Tok/s</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="lb-row-fastest">
+                <td class="lb-model">kimi-k2</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#f55036"></span>groq</td>
+                <td class="lb-val lb-green">109ms</td>
+                <td class="lb-val">157ms</td>
+                <td class="lb-val">175.3</td>
+              </tr>
+              <tr>
+                <td class="lb-model">llama-3.1-8b-instant</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#f55036"></span>groq</td>
+                <td class="lb-val lb-green">114ms</td>
+                <td class="lb-val">130ms</td>
+                <td class="lb-val">387.0</td>
+              </tr>
+              <tr>
+                <td class="lb-model">llama-4-scout-17b</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#f55036"></span>groq</td>
+                <td class="lb-val lb-green">166ms</td>
+                <td class="lb-val">275ms</td>
+                <td class="lb-val">234.7</td>
+              </tr>
+              <tr>
+                <td class="lb-model">llama-3.3-70b-versatile</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#f55036"></span>groq</td>
+                <td class="lb-val">327ms</td>
+                <td class="lb-val">378ms</td>
+                <td class="lb-val">181.6</td>
+              </tr>
+              <tr>
+                <td class="lb-model">gpt-4o</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#74aa9c"></span>openai</td>
+                <td class="lb-val">380ms</td>
+                <td class="lb-val">451ms</td>
+                <td class="lb-val">81.6</td>
+              </tr>
+              <tr>
+                <td class="lb-model">claude-haiku-4-5</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#d4a5a5"></span>anthropic</td>
+                <td class="lb-val">463ms</td>
+                <td class="lb-val">1700ms</td>
+                <td class="lb-val">68.8</td>
+              </tr>
+              <tr>
+                <td class="lb-model">gpt-4o-mini</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#74aa9c"></span>openai</td>
+                <td class="lb-val">508ms</td>
+                <td class="lb-val">549ms</td>
+                <td class="lb-val">44.0</td>
+              </tr>
+              <tr>
+                <td class="lb-model">o3-mini</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#74aa9c"></span>openai</td>
+                <td class="lb-val lb-red">956ms</td>
+                <td class="lb-val">1508ms</td>
+                <td class="lb-val">70.1</td>
+              </tr>
+              <tr>
+                <td class="lb-model">claude-sonnet-4-5</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#d4a5a5"></span>anthropic</td>
+                <td class="lb-val lb-red">1361ms</td>
+                <td class="lb-val">1792ms</td>
+                <td class="lb-val">31.4</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── STT Tab ── -->
+      <div class="lb-panel" id="tab-stt" style="display:none">
+        <div class="lb-table-wrap">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Provider</th>
+                <th class="lb-th-num">Latency P50</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="lb-row-fastest">
+                <td class="lb-model">whisper-large-v3</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#f55036"></span>groq</td>
+                <td class="lb-val lb-green">360ms</td>
+              </tr>
+              <tr>
+                <td class="lb-model">whisper-large-v3-turbo</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#f55036"></span>groq</td>
+                <td class="lb-val lb-green">527ms</td>
+              </tr>
+              <tr>
+                <td class="lb-model">nova-3</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#13ef95"></span>deepgram</td>
+                <td class="lb-val lb-green">583ms</td>
+              </tr>
+              <tr>
+                <td class="lb-model">nova-2</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#13ef95"></span>deepgram</td>
+                <td class="lb-val">622ms</td>
+              </tr>
+              <tr>
+                <td class="lb-model">gpt-4o-transcribe</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#74aa9c"></span>openai</td>
+                <td class="lb-val">799ms</td>
+              </tr>
+              <tr>
+                <td class="lb-model">universal-2</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#5965e0"></span>assemblyai</td>
+                <td class="lb-val">1725ms</td>
+              </tr>
+              <tr>
+                <td class="lb-model">universal-3-pro</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#5965e0"></span>assemblyai</td>
+                <td class="lb-val lb-red">2855ms</td>
+              </tr>
+              <tr>
+                <td class="lb-model">default</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#e04f96"></span>gladia</td>
+                <td class="lb-val lb-red">3452ms</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── TTS Tab ── -->
+      <div class="lb-panel" id="tab-tts" style="display:none">
+        <div class="lb-table-wrap">
+          <table class="lb-table">
+            <thead>
+              <tr>
+                <th>Model</th>
+                <th>Provider</th>
+                <th class="lb-th-num">TTFB P50</th>
+                <th class="lb-th-num">Realtime Factor</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr class="lb-row-fastest">
+                <td class="lb-model">aura-luna</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#13ef95"></span>deepgram</td>
+                <td class="lb-val lb-green">156ms</td>
+                <td class="lb-val lb-rtf-yellow">2.7×</td>
+              </tr>
+              <tr>
+                <td class="lb-model">sonic-2</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#00ff88"></span>cartesia</td>
+                <td class="lb-val lb-green">200ms</td>
+                <td class="lb-val lb-rtf-yellow">3.9×</td>
+              </tr>
+              <tr>
+                <td class="lb-model">sonic-english</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#00ff88"></span>cartesia</td>
+                <td class="lb-val lb-green">210ms</td>
+                <td class="lb-val lb-rtf-red">1.9×</td>
+              </tr>
+              <tr>
+                <td class="lb-model">aura-asteria</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#13ef95"></span>deepgram</td>
+                <td class="lb-val">293ms</td>
+                <td class="lb-val lb-rtf-yellow">2.1×</td>
+              </tr>
+              <tr>
+                <td class="lb-model">aurora</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#ff7043"></span>lmnt</td>
+                <td class="lb-val">298ms</td>
+                <td class="lb-val lb-rtf-yellow">2.8×</td>
+              </tr>
+              <tr>
+                <td class="lb-model">blizzard</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#ff7043"></span>lmnt</td>
+                <td class="lb-val">310ms</td>
+                <td class="lb-val lb-rtf-yellow">3.5×</td>
+              </tr>
+              <tr>
+                <td class="lb-model">flash-v2.5</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#f5c842"></span>elevenlabs</td>
+                <td class="lb-val">374ms</td>
+                <td class="lb-val lb-rtf-green">11.3×</td>
+              </tr>
+              <tr>
+                <td class="lb-model">tts-1</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#74aa9c"></span>openai</td>
+                <td class="lb-val">1050ms</td>
+                <td class="lb-val lb-rtf-yellow">3.6×</td>
+              </tr>
+              <tr>
+                <td class="lb-model">multilingual-v2</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#f5c842"></span>elevenlabs</td>
+                <td class="lb-val">1277ms</td>
+                <td class="lb-val lb-rtf-yellow">4.0×</td>
+              </tr>
+              <tr>
+                <td class="lb-model">tts-1-hd</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#74aa9c"></span>openai</td>
+                <td class="lb-val lb-red">2010ms</td>
+                <td class="lb-val lb-rtf-yellow">2.3×</td>
+              </tr>
+              <tr>
+                <td class="lb-model">default</td>
+                <td class="lb-provider"><span class="lb-dot" style="background:#4fc3f7"></span>fish-audio</td>
+                <td class="lb-val lb-red">2511ms</td>
+                <td class="lb-val lb-rtf-yellow">2.9×</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── Pipeline Tab ── -->
+      <div class="lb-panel" id="tab-pipeline" style="display:none">
+        <div class="lb-pipeline">
+          <div class="pipeline-route">
+            groq/whisper-large-v3-turbo → groq/llama-3.3-70b → cartesia/sonic-2
+          </div>
+          <div class="pipeline-bar-wrap">
+            <div class="pipeline-bar">
+              <!-- proportional to measured stage sum: 649ms total -->
+              <!-- STT 336ms = 51.8%, LLM 140ms = 21.6%, TTS 173ms = 26.6% -->
+              <div class="pipeline-seg seg-stt" style="width:51.8%">
+                <span class="seg-label">STT<br>336ms</span>
+              </div>
+              <div class="pipeline-seg seg-llm" style="width:21.6%">
+                <span class="seg-label">LLM<br>140ms</span>
+              </div>
+              <div class="pipeline-seg seg-tts" style="width:26.6%">
+                <span class="seg-label">TTS<br>173ms</span>
+              </div>
+            </div>
+            <div class="pipeline-bar-note">Segments show per-stage latency (STT+LLM+TTS = 649ms measured). Wall-clock total includes streaming overlap &amp; network.</div>
+          </div>
+          <div class="pipeline-total">Total end-to-end: <strong>1644ms</strong></div>
+          <div class="pipeline-legend">
+            <span class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span>STT</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#8b5cf6"></span>LLM</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#00ff88"></span>TTS</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- CTA -->
+      <div class="lb-cta">
+        <div class="lb-cta-text">
+          <strong>Want to see your stack benchmarked?</strong>
+          <span>We run real benchmarks from multiple regions.</span>
+        </div>
+        <a href="mailto:hello@latencygrid.dev?subject=Benchmark Request&body=Provider/model I want benchmarked:%0A%0ARegion:%0A%0AUse case:" class="lb-cta-link">
+          Request a free benchmark →
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       FEATURES
+  ════════════════════════════════════════════ -->
+  <section class="section features-section" id="features">
+    <div class="container">
+      <h2 class="section-title">Built for production observability</h2>
+      <p class="section-sub">The numbers that actually matter for real-time AI apps.</p>
+
+      <div class="features-grid">
+        <div class="feature-card">
+          <div class="feature-icon">⚡</div>
+          <h3>TTFT-first</h3>
+          <p>Measures Time to First Token and Time to First Audio Byte via real streaming connections. The metrics that determine perceived responsiveness.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">📊</div>
+          <h3>P50 / P95 / P99</h3>
+          <p>Not just averages. Run N times, get real percentile distributions. Know your tail latency before users do.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🔧</div>
+          <h3>Pipeline benchmarks</h3>
+          <p>Test your full STT→LLM→TTS stack in one command. See exactly where latency comes from — per stage, every run.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       QUICK START
+  ════════════════════════════════════════════ -->
+  <section class="section quickstart-section" id="quickstart">
+    <div class="container">
+      <h2 class="section-title">Quick start</h2>
+      <p class="section-sub">Zero config. Set your API keys, run benchmarks.</p>
+
+      <div class="terminal-window">
+        <div class="terminal-bar">
+          <span class="dot red"></span>
+          <span class="dot yellow"></span>
+          <span class="dot green-dot"></span>
+          <span class="terminal-title">modelping — quick start</span>
+        </div>
+        <div class="terminal-body code-body">
+<pre><span class="cmd">pip install modelping</span>
+
+<span class="comment"># Set your API keys</span>
+<span class="keyword">export</span> <span class="var">GROQ_API_KEY</span>=...
+<span class="keyword">export</span> <span class="var">OPENAI_API_KEY</span>=...
+<span class="keyword">export</span> <span class="var">CARTESIA_API_KEY</span>=...
+
+<span class="comment"># Benchmark the full voice pipeline</span>
+<span class="cmd">modelping pipeline</span>
+
+<span class="comment"># Or benchmark individual components</span>
+<span class="cmd">modelping run --all</span>          <span class="comment"># LLM providers</span>
+<span class="cmd">modelping stt --all</span>          <span class="comment"># STT providers</span>
+<span class="cmd">modelping tts --all</span>          <span class="comment"># TTS providers</span>
+
+<span class="comment"># CI gate — fail if pipeline &gt; 500ms</span>
+<span class="cmd">modelping pipeline --fail-above-ttft 500</span></pre>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       ROADMAP
+  ════════════════════════════════════════════ -->
+  <section class="section roadmap-section" id="roadmap">
+    <div class="container">
+      <h2 class="section-title">Roadmap</h2>
+      <p class="section-sub">What's built and what's coming.</p>
+      <div class="roadmap-list">
+        <div class="roadmap-item roadmap-done">✅ LLM benchmarking — TTFT, throughput, cost</div>
+        <div class="roadmap-item roadmap-done">✅ STT benchmarking — transcription latency</div>
+        <div class="roadmap-item roadmap-done">✅ TTS benchmarking — time to first audio byte</div>
+        <div class="roadmap-item roadmap-done">✅ Full STT→LLM→TTS pipeline benchmark</div>
+        <div class="roadmap-item roadmap-pending">🔲 Community leaderboard — global rankings, regional data</div>
+        <div class="roadmap-item roadmap-pending">🔲 Web UI — run benchmarks in your browser</div>
+        <div class="roadmap-item roadmap-pending">🔲 Self-hosted model endpoints</div>
+        <div class="roadmap-item roadmap-pending">🔲 Historical tracking and latency alerts</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       PROVIDERS
+  ════════════════════════════════════════════ -->
+  <section class="section providers-section" id="providers">
+    <div class="container">
+      <h2 class="section-title">Supported providers</h2>
+      <p class="section-sub">LLM, STT, and TTS — every major inference API.</p>
+
+      <div class="providers-rows">
+
+        <div class="provider-row">
+          <span class="provider-row-label">LLM</span>
+          <div class="providers-grid">
+            <div class="provider-badge openai"><span class="provider-dot"></span>OpenAI</div>
+            <div class="provider-badge anthropic"><span class="provider-dot"></span>Anthropic</div>
+            <div class="provider-badge google"><span class="provider-dot"></span>Google</div>
+            <div class="provider-badge groq"><span class="provider-dot"></span>Groq</div>
+            <div class="provider-badge fireworks"><span class="provider-dot"></span>Fireworks</div>
+            <div class="provider-badge together"><span class="provider-dot"></span>Together AI</div>
+            <div class="provider-badge mistral"><span class="provider-dot"></span>Mistral</div>
+            <div class="provider-badge cohere"><span class="provider-dot"></span>Cohere</div>
+          </div>
+        </div>
+
+        <div class="provider-row">
+          <span class="provider-row-label">STT</span>
+          <div class="providers-grid">
+            <div class="provider-badge groq-whisper"><span class="provider-dot"></span>Groq Whisper</div>
+            <div class="provider-badge openai-whisper"><span class="provider-dot"></span>OpenAI Whisper</div>
+            <div class="provider-badge deepgram"><span class="provider-dot"></span>Deepgram</div>
+            <div class="provider-badge assemblyai"><span class="provider-dot"></span>AssemblyAI</div>
+            <div class="provider-badge gladia"><span class="provider-dot"></span>Gladia</div>
+          </div>
+        </div>
+
+        <div class="provider-row">
+          <span class="provider-row-label">TTS</span>
+          <div class="providers-grid">
+            <div class="provider-badge elevenlabs"><span class="provider-dot"></span>ElevenLabs</div>
+            <div class="provider-badge cartesia"><span class="provider-dot"></span>Cartesia</div>
+            <div class="provider-badge fish-audio"><span class="provider-dot"></span>Fish Audio</div>
+            <div class="provider-badge playht"><span class="provider-dot"></span>PlayHT</div>
+            <div class="provider-badge deepgram-aura"><span class="provider-dot"></span>Deepgram Aura</div>
+            <div class="provider-badge lmnt"><span class="provider-dot"></span>LMNT</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       FOOTER
+  ════════════════════════════════════════════ -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="footer-logo">LatencyGrid</span>
+        <span class="footer-tagline">Built for the MLOps community</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+        <a href="https://github.com/latencygrid/modelping/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <div class="footer-meta">
+        A <strong>LatencyGrid</strong> project · <span class="dim">latencygrid.dev</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Leaderboard tab switching
+    document.querySelectorAll('.lb-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var tabId = this.getAttribute('data-tab');
+        document.querySelectorAll('.lb-tab').forEach(function(t) {
+          t.classList.remove('active');
+          t.setAttribute('aria-selected', 'false');
+        });
+        document.querySelectorAll('.lb-panel').forEach(function(p) {
+          p.style.display = 'none';
+        });
+        this.classList.add('active');
+        this.setAttribute('aria-selected', 'true');
+        document.getElementById('tab-' + tabId).style.display = 'block';
+      });
+    });
+  </script>
+
+  <script>
+    function copyPip() {
+      navigator.clipboard.writeText('pip install modelping').then(() => {
+        const copyIcon = document.getElementById('copy-icon');
+        const checkIcon = document.getElementById('check-icon');
+        const cmd = document.getElementById('pip-cmd');
+        copyIcon.style.display = 'none';
+        checkIcon.style.display = 'inline';
+        cmd.classList.add('copied');
+        setTimeout(() => {
+          checkIcon.style.display = 'none';
+          copyIcon.style.display = 'inline';
+          cmd.classList.remove('copied');
+        }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
