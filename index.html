@@ -1017,17 +1017,19 @@
     }
 
     function findBestSubmission(submissions) {
-      // Prefer most recent with all three (llm, stt, tts)
-      // index doesn't have arrays, so just pick most recent — detail fetch will tell us
-      // Sort by timestamp descending
-      var sorted = submissions.slice().sort(function(a,b){
-        return new Date(b.timestamp) - new Date(a.timestamp);
+      // Score each submission by completeness: prefer LLM+STT+TTS over LLM-only
+      // Use llm_count + stt_count + tts_count as score, tiebreak by recency
+      var scored = submissions.slice().map(function(s) {
+        var score = (s.llm_count || (s.fastest_llm_ms ? 1 : 0)) +
+                    (s.stt_count || (s.fastest_stt_ms ? 1 : 0)) * 5 +
+                    (s.tts_count || (s.fastest_tts_ms ? 1 : 0)) * 5;
+        return { s: s, score: score, ts: new Date(s.timestamp) };
       });
-      // Prefer ones that have fastest_llm_ms AND fastest_stt_ms AND fastest_tts_ms
-      var full = sorted.filter(function(s){
-        return s.fastest_llm_ms != null && s.fastest_stt_ms != null && s.fastest_tts_ms != null;
+      scored.sort(function(a, b) {
+        if (b.score !== a.score) return b.score - a.score; // higher score first
+        return b.ts - a.ts; // tiebreak: most recent first
       });
-      return (full.length ? full[0] : sorted[0]) || null;
+      return scored.length ? scored[0].s : null;
     }
 
     async function loadLiveData() {
