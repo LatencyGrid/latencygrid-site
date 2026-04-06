@@ -495,6 +495,103 @@
       color: var(--accent) !important;
     }
 
+    /* Live tag */
+    .quiz-live-tag {
+      font-size: 11px;
+      color: #52525b;
+      font-family: 'JetBrains Mono', monospace;
+      margin: 6px 0 0;
+    }
+
+    /* Live / cached badges */
+    .live-badge {
+      display: inline-block;
+      background: rgba(0,229,255,0.1);
+      color: #00e5ff;
+      border: 1px solid rgba(0,229,255,0.2);
+      border-radius: 4px;
+      font-size: 10px;
+      padding: 2px 6px;
+      font-family: 'JetBrains Mono', monospace;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .cached-badge {
+      display: inline-block;
+      background: rgba(255,255,255,0.05);
+      color: #52525b;
+      border: 1px solid #2a2a2a;
+      border-radius: 4px;
+      font-size: 10px;
+      padding: 2px 6px;
+      font-family: 'JetBrains Mono', monospace;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+
+    /* Lead capture form */
+    .lead-form {
+      background: rgba(0, 229, 255, 0.03);
+      border: 1px solid rgba(0, 229, 255, 0.15);
+      border-radius: 12px;
+      padding: 28px;
+      margin-top: 24px;
+    }
+    .lead-form-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #fafafa;
+      margin: 0 0 6px;
+    }
+    .lead-form-sub {
+      font-size: 13px;
+      color: #71717a;
+      margin: 0 0 20px;
+      line-height: 1.5;
+    }
+    .lead-form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .lead-form input {
+      width: 100%;
+      background: #0d0d0d;
+      border: 1px solid #2a2a2a;
+      border-radius: 8px;
+      color: #fafafa;
+      font-size: 14px;
+      padding: 10px 14px;
+      box-sizing: border-box;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+      margin-bottom: 10px;
+    }
+    .lead-form input:focus { border-color: #00e5ff; }
+    .lead-submit-btn {
+      background: #00e5ff;
+      color: #09090b;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      transition: background 0.15s;
+    }
+    .lead-submit-btn:hover { background: #33ecff; }
+    .lead-success {
+      color: #22c55e;
+      font-size: 14px;
+      padding: 12px 0;
+    }
+    @media (max-width: 500px) {
+      .lead-form-row { grid-template-columns: 1fr; }
+    }
+
     /* CSS variables fallbacks in case styles.css is different */
     :root {
       --accent: #00ff88;
@@ -510,13 +607,14 @@
   <section class="hero quiz-hero">
     <nav class="nav">
       <a href="/" class="nav-logo">
-        <img src="/logo.svg" width="20" height="20" alt="LatencyGrid" style="display:inline-block;vertical-align:middle;">
+        <img src="/logo.svg" width="20" height="20" alt="LatencyGrid" style="display:inline-block;vertical-align:middle;margin-right:8px;">
         LatencyGrid
       </a>
       <div class="nav-links">
         <a href="/leaderboard">Leaderboard</a>
         <a href="/submit">Submit</a>
         <a href="/quiz" class="nav-active">Stack Builder</a>
+        <a href="/claims">Claims</a>
         <a href="/benchmark">Request Benchmark</a>
         <a href="https://github.com/LatencyGrid/modelping" target="_blank" rel="noopener">GitHub</a>
       </div>
@@ -532,6 +630,7 @@
         <p class="quiz-context-title">Build Your Stack</p>
         <p class="quiz-context-sub">Answer three questions to find the optimal STT, LLM, and TTS combination for your use case. Based on real benchmark data.</p>
         <p class="quiz-context-meta">This tool uses real latency data from our daily benchmarks to recommend a voice AI stack optimized for your priorities.<br>Data last updated: April 2026 · Ottawa, Canada + US East</p>
+        <p class="quiz-live-tag" id="quizLiveTag">Loading live benchmark data...</p>
       </div>
 
       <!-- Progress bar -->
@@ -736,6 +835,24 @@
         </div>
 
         <span class="retake-link" onclick="retakeQuiz()">← Rebuild your stack</span>
+
+        <!-- Lead capture -->
+        <div class="lead-form" id="leadForm">
+          <h3 class="lead-form-title">Get your full stack report</h3>
+          <p class="lead-form-sub">We'll send you a detailed breakdown with cost estimates, regional latency data, and implementation notes for your recommended stack.</p>
+          <form id="leadCaptureForm">
+            <div class="lead-form-row">
+              <input type="text" id="leadName" placeholder="First name" required />
+              <input type="text" id="leadCompany" placeholder="Company" required />
+            </div>
+            <input type="email" id="leadEmail" placeholder="Work email" required />
+            <input type="text" id="leadUseCase" placeholder="What are you building? (optional)" />
+            <button type="submit" class="lead-submit-btn">Send me the report →</button>
+          </form>
+          <div class="lead-success" id="leadSuccess" style="display:none">
+            Thanks! Check your inbox. We'll also follow up if we have questions about your use case.
+          </div>
+        </div>
       </div>
 
     </div>
@@ -772,43 +889,127 @@
     // ── State ──
     const answers = { q1: null, q2: null, q3: null };
 
+    // ── Live data ──
+    let LIVE_DATA = null;
+
+    async function loadLiveData() {
+      try {
+        const res = await fetch('https://api.latencygrid.dev/results');
+        const data = await res.json();
+        if (!data.success) return;
+
+        // Find most complete submission
+        const best = data.submissions
+          .filter(s => (s.llm_count || 0) > 0)
+          .sort((a, b) => ((b.stt_count||0) + (b.tts_count||0)) - ((a.stt_count||0) + (a.tts_count||0)))[0];
+
+        if (!best) return;
+
+        const detail = await fetch('https://api.latencygrid.dev/results/' + best.id);
+        const detailData = await detail.json();
+        if (!detailData.success) return;
+
+        const sub = detailData.submission;
+        LIVE_DATA = {
+          llm: sub.llm || [],
+          stt: sub.stt || [],
+          tts: sub.tts || [],
+          location: sub.location,
+          timestamp: sub.timestamp
+        };
+
+        updateStacksFromLiveData();
+
+        // Update live tag
+        const tag = document.getElementById('quizLiveTag');
+        if (tag) {
+          tag.textContent = 'Using live data from ' + LIVE_DATA.location + ' · updated ' + timeAgo(LIVE_DATA.timestamp);
+        }
+      } catch (e) {
+        console.log('Stack Builder: using cached data');
+        const tag = document.getElementById('quizLiveTag');
+        if (tag) tag.textContent = 'Using cached benchmark data';
+      }
+    }
+
+    function timeAgo(timestamp) {
+      if (!timestamp) return 'recently';
+      const diff = Math.floor((Date.now() - new Date(timestamp).getTime()) / 1000);
+      if (diff < 60) return diff + 's ago';
+      if (diff < 3600) return Math.floor(diff / 60) + 'm ago';
+      if (diff < 86400) return Math.floor(diff / 3600) + 'h ago';
+      return Math.floor(diff / 86400) + 'd ago';
+    }
+
+    function getLiveTTFT(modelKey) {
+      if (!LIVE_DATA) return null;
+      const m = LIVE_DATA.llm.find(m => m.model === modelKey || m.model.includes(modelKey.split('/').pop()));
+      return m ? Math.round(m.ttft_p50) : null;
+    }
+
+    function getLiveSTT(modelKey) {
+      if (!LIVE_DATA) return null;
+      const m = LIVE_DATA.stt.find(m => m.model === modelKey || m.model.includes(modelKey));
+      return m ? Math.round(m.latency_p50 || m.transcription_latency_ms) : null;
+    }
+
+    function getLiveTTS(modelKey) {
+      if (!LIVE_DATA) return null;
+      const m = LIVE_DATA.tts.find(m => m.model === modelKey || m.model.includes(modelKey));
+      return m ? Math.round(m.ttfb_p50 || m.ttfb_ms) : null;
+    }
+
+    function updateStacksFromLiveData() {
+      Object.keys(STACKS).forEach(key => {
+        const s = STACKS[key];
+        const liveStt = getLiveSTT(s.stt.cmd);
+        const liveLlm = getLiveTTFT(s.llm.cmd);
+        const liveTts = getLiveTTS(s.tts.cmd);
+        if (liveStt) s.stt.ms = liveStt;
+        if (liveLlm) s.llm.ms = liveLlm;
+        if (liveTts) s.tts.ms = liveTts;
+        s.total = s.stt.ms + s.llm.ms + s.tts.ms;
+        s.live = !!(liveStt || liveLlm || liveTts);
+      });
+    }
+
     // ── Stacks ──
     const STACKS = {
       speed: {
         badge: 'Speed-optimized',
         title: 'Fastest available stack',
-        sub: 'Fastest available stack. All three providers optimized for low latency.',
+        sub: 'All three providers optimized for low latency. Best for real-time voice where every ms counts.',
         stt: { model: 'Groq Whisper Large v3', ms: 360, cmd: 'groq/whisper-large-v3' },
-        llm: { model: 'Groq Llama 3.3 70B', ms: 140, cmd: 'llama-3.3-70b-versatile' },
-        tts: { model: 'Deepgram Aura Luna', ms: 156, cmd: 'deepgram/aura-luna' },
-        total: 656,
+        llm: { model: 'Groq kimi-k2', ms: 109, cmd: 'moonshotai/kimi-k2-instruct' },
+        tts: { model: 'Deepgram Aura Luna', ms: 156, cmd: 'deepgram-tts/luna' },
+        total: 625,
       },
       cost: {
         badge: 'Cost-optimized',
         title: 'Best cost per request',
-        sub: 'Best cost per request without sacrificing too much speed. Groq free tier is generous.',
-        stt: { model: 'Groq Whisper Large v3', ms: 360, cmd: 'groq/whisper-large-v3' },
+        sub: 'Low cost without sacrificing much speed. Groq free tier is generous for prototyping.',
+        stt: { model: 'Groq Whisper Turbo', ms: 527, cmd: 'groq/whisper-large-v3-turbo' },
         llm: { model: 'Groq Llama 3.1 8B', ms: 114, cmd: 'llama-3.1-8b-instant' },
-        tts: { model: 'Deepgram Aura', ms: 156, cmd: 'deepgram/aura-asteria' },
-        total: 630,
+        tts: { model: 'Deepgram Aura Asteria', ms: 293, cmd: 'deepgram-tts/asteria' },
+        total: 934,
       },
       quality: {
         badge: 'Quality-optimized',
         title: 'Highest quality output',
-        sub: 'Highest quality output. Best for customer-facing applications where accuracy matters most.',
+        sub: 'Best accuracy and naturalness. Ideal for customer-facing applications.',
         stt: { model: 'OpenAI gpt-4o-transcribe', ms: 799, cmd: 'openai/gpt-4o-transcribe' },
-        llm: { model: 'Claude Haiku 4.5', ms: 463, cmd: 'claude-haiku-4-5' },
-        tts: { model: 'ElevenLabs Flash v2.5', ms: 374, cmd: 'elevenlabs/flash-v2.5' },
+        llm: { model: 'Claude Haiku 4.5', ms: 463, cmd: 'claude-haiku-4-5-20251001' },
+        tts: { model: 'ElevenLabs Flash v2.5', ms: 374, cmd: 'elevenlabs/flash' },
         total: 1636,
       },
       balance: {
         badge: 'Balanced',
-        title: 'Strong balance of speed, cost, and quality',
-        sub: 'Strong balance of speed, cost, and quality. The default recommendation for most teams.',
+        title: 'Best of all three',
+        sub: 'Strong balance of speed, cost, and quality. The default choice for most production teams.',
         stt: { model: 'Deepgram Nova-3', ms: 583, cmd: 'deepgram/nova-3' },
-        llm: { model: 'Groq Llama 3.3 70B', ms: 140, cmd: 'llama-3.3-70b-versatile' },
+        llm: { model: 'Groq Llama 3.3 70B', ms: 327, cmd: 'llama-3.3-70b-versatile' },
         tts: { model: 'Cartesia Sonic-2', ms: 200, cmd: 'cartesia/sonic-2' },
-        total: 923,
+        total: 1110,
       }
     };
 
@@ -868,7 +1069,10 @@
       var stack = STACKS[rec];
 
       // Populate result
-      document.getElementById('resultBadge').textContent = stack.badge;
+      const dataBadge = (LIVE_DATA && stack.live)
+        ? '<span class="live-badge">Live data</span>'
+        : '<span class="cached-badge">Cached data</span>';
+      document.getElementById('resultBadge').innerHTML = stack.badge + dataBadge;
       document.getElementById('resultTitle').textContent = stack.title;
       document.getElementById('resultSub').textContent = stack.sub;
       document.getElementById('resSttModel').textContent = stack.stt.model;
@@ -922,6 +1126,10 @@
       document.getElementById('progressFill').style.width = '33%';
       document.getElementById('progressLabel').textContent = 'Stack Builder — Question 1 of 3';
       document.getElementById('q1').classList.add('active');
+      // Reset lead form
+      document.getElementById('leadCaptureForm').style.display = 'block';
+      document.getElementById('leadSuccess').style.display = 'none';
+      document.getElementById('leadCaptureForm').reset();
       history.replaceState(null, '', '/quiz');
     }
 
@@ -951,7 +1159,33 @@
       });
     }
 
-    // ── On load: check URL params ──
+    // ── Lead capture form ──
+    document.getElementById('leadCaptureForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('leadName').value;
+      const company = document.getElementById('leadCompany').value;
+      const email = document.getElementById('leadEmail').value;
+      const useCase = document.getElementById('leadUseCase').value;
+      const badgeEl = document.querySelector('.result-badge');
+      const stack = badgeEl ? badgeEl.textContent.trim() : 'Unknown';
+
+      const subject = encodeURIComponent('Stack Builder Lead - ' + company);
+      const body = encodeURIComponent(
+        'Name: ' + name + '\n' +
+        'Company: ' + company + '\n' +
+        'Email: ' + email + '\n' +
+        'Recommended stack: ' + stack + '\n' +
+        'Building: ' + (useCase || 'Not specified')
+      );
+
+      window.location.href = 'mailto:hello@latencygrid.dev?subject=' + subject + '&body=' + body;
+      document.getElementById('leadSuccess').style.display = 'block';
+      document.getElementById('leadCaptureForm').style.display = 'none';
+    });
+
+    // ── On load: fetch live data + check URL params ──
+    loadLiveData();
+
     (function() {
       var params = new URLSearchParams(window.location.search);
       var rec = params.get('rec');

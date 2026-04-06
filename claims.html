@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Provider Claims vs. Reality — LatencyGrid</title>
+  <meta name="description" content="We ran the same benchmark on every AI provider. Here's how their published latency claims compare to what we actually measured." />
+  <meta property="og:title" content="Provider Claims vs. Reality — LatencyGrid" />
+  <meta property="og:description" content="Published latency numbers vs. real-world measurements for LLM, STT, and TTS providers." />
+  <meta property="og:type" content="website" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+  <link rel="apple-touch-icon" href="/favicon-32.png">
+
+  <style>
+    .claims-page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 80px 24px 120px;
+    }
+
+    /* ── Header ── */
+    .page-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 4px;
+      padding: 4px 10px;
+      margin-bottom: 16px;
+    }
+
+    .page-title {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 800;
+      color: var(--fg);
+      margin: 0 0 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .page-sub {
+      font-size: 16px;
+      color: var(--fg-muted);
+      margin: 0 0 32px;
+      line-height: 1.6;
+      max-width: 680px;
+    }
+
+    /* ── Methodology box ── */
+    .methodology-box {
+      background: #0d0d0d;
+      border: 1px solid #1e1e1e;
+      border-left: 3px solid var(--accent);
+      border-radius: 8px;
+      padding: 20px 24px;
+      margin-bottom: 12px;
+    }
+
+    .methodology-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 8px;
+    }
+
+    .methodology-text {
+      font-size: 13px;
+      color: var(--fg-muted);
+      line-height: 1.7;
+      margin: 0;
+    }
+
+    .last-updated {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: #52525b;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .last-updated-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #52525b;
+      display: inline-block;
+    }
+
+    .last-updated-dot.fresh {
+      background: var(--accent);
+      box-shadow: 0 0 6px rgba(0, 255, 136, 0.5);
+    }
+
+    /* ── Section headers ── */
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin: 48px 0 16px;
+    }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--fg);
+      letter-spacing: -0.01em;
+    }
+
+    .section-tag {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--fg-muted);
+      background: #1a1a1a;
+      border: 1px solid #2a2a2a;
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+
+    /* ── Table wrapper ── */
+    .table-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      border: 1px solid #1e1e1e;
+      border-radius: 10px;
+      margin-bottom: 8px;
+    }
+
+    .claims-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+      min-width: 700px;
+    }
+
+    .claims-table thead th {
+      padding: 12px 16px;
+      text-align: left;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      background: #0d0d0d;
+      border-bottom: 1px solid #1e1e1e;
+      white-space: nowrap;
+    }
+
+    .claims-table thead th:first-child { border-radius: 10px 0 0 0; }
+    .claims-table thead th:last-child  { border-radius: 0 10px 0 0; }
+
+    .claims-table tbody tr {
+      border-bottom: 1px solid #111;
+      transition: background 0.12s;
+    }
+
+    .claims-table tbody tr:last-child { border-bottom: none; }
+    .claims-table tbody tr:hover { background: rgba(255,255,255,0.02); }
+
+    .claims-table tbody td {
+      padding: 13px 16px;
+      color: var(--fg);
+      vertical-align: middle;
+    }
+
+    /* No-claim rows are muted */
+    .claims-table tbody tr.no-claim td {
+      opacity: 0.55;
+    }
+
+    /* Provider + Model cells */
+    .provider-name {
+      font-weight: 600;
+      color: var(--fg);
+    }
+
+    .model-name {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--fg-muted);
+    }
+
+    /* Claim cell */
+    .claim-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    .claim-none {
+      font-size: 12px;
+      color: #52525b;
+      font-style: italic;
+    }
+
+    /* Measured cell */
+    .measured-value {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg);
+    }
+
+    .measured-loading {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #52525b;
+      animation: loadingPulse 1.2s ease-in-out infinite;
+    }
+
+    .measured-cached {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: #52525b;
+    }
+
+    .cached-label {
+      font-size: 10px;
+      color: #3f3f46;
+      margin-left: 4px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    /* Source cell */
+    .source-link {
+      font-size: 12px;
+      color: var(--accent);
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.15s;
+    }
+    .source-link:hover { opacity: 1; }
+
+    .source-none {
+      font-size: 12px;
+      color: #3f3f46;
+    }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 3px 9px;
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+
+    .status-matches {
+      color: #4ade80;
+      background: rgba(74, 222, 128, 0.1);
+      border: 1px solid rgba(74, 222, 128, 0.2);
+    }
+
+    .status-faster {
+      color: #22d3ee;
+      background: rgba(34, 211, 238, 0.1);
+      border: 1px solid rgba(34, 211, 238, 0.2);
+    }
+
+    .status-slower {
+      color: #fb923c;
+      background: rgba(251, 146, 60, 0.1);
+      border: 1px solid rgba(251, 146, 60, 0.2);
+    }
+
+    .status-none {
+      color: #52525b;
+      background: rgba(82, 82, 91, 0.1);
+      border: 1px solid rgba(82, 82, 91, 0.2);
+    }
+
+    .status-loading {
+      color: #52525b;
+      background: transparent;
+      border: 1px solid #1e1e1e;
+      animation: loadingPulse 1.2s ease-in-out infinite;
+    }
+
+    /* Footer note */
+    .claims-footnote {
+      font-size: 12px;
+      color: #52525b;
+      margin-top: 12px;
+      text-align: right;
+    }
+
+    .claims-footnote a {
+      color: var(--accent);
+      text-decoration: none;
+      opacity: 0.7;
+    }
+    .claims-footnote a:hover { opacity: 1; }
+
+    /* API error banner */
+    .api-error-banner {
+      display: none;
+      background: rgba(251, 146, 60, 0.08);
+      border: 1px solid rgba(251, 146, 60, 0.2);
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 12px;
+      color: #fb923c;
+      margin-bottom: 24px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    @keyframes loadingPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    /* Mobile scroll hint */
+    @media (max-width: 768px) {
+      .table-scroll-hint {
+        font-size: 11px;
+        color: #52525b;
+        margin-bottom: 6px;
+        text-align: right;
+        font-family: 'JetBrains Mono', monospace;
+      }
+    }
+
+    @media (min-width: 769px) {
+      .table-scroll-hint { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== NAV ===== -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <img src="/logo.svg" width="20" height="20" alt="LatencyGrid" style="display:inline-block;vertical-align:middle;margin-right:8px;">
+      LatencyGrid
+    </a>
+    <button class="nav-mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/leaderboard.html">Leaderboard</a></li>
+      <li><a href="/submit">Submit</a></li>
+      <li><a href="/quiz.html">Stack Builder</a></li>
+      <li><a href="/claims.html" class="nav-active">Claims</a></li>
+      <li><a href="/benchmark.html">Request Benchmark</a></li>
+      <li>
+        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener" class="nav-github">
+          GitHub
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-left:3px;">
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+            <polyline points="15 3 21 3 21 9"/>
+            <line x1="10" y1="14" x2="21" y2="3"/>
+          </svg>
+        </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ===== PAGE ===== -->
+<main class="claims-page">
+
+  <div class="page-badge">TRANSPARENCY REPORT</div>
+  <h1 class="page-title">Provider Claims vs. Reality</h1>
+  <p class="page-sub">We ran the same benchmark on every provider. Here's how their published numbers compare to what we measured.</p>
+
+  <div class="methodology-box">
+    <div class="methodology-label">Methodology</div>
+    <p class="methodology-text">
+      TTFT measured via streaming from Ottawa, Canada and US East (Azure).
+      5 runs per model. Test prompt: <em>"Explain the concept of neural networks in one paragraph."</em><br>
+      STT: 5-second WAV test audio. TTS: 92-character sentence.<br>
+      All measurements made April 2026. Results vary by region and load.
+    </p>
+  </div>
+
+  <div class="last-updated" id="lastUpdated">
+    <span class="last-updated-dot" id="freshnessDot"></span>
+    <span id="lastUpdatedText">Loading data…</span>
+  </div>
+
+  <div class="api-error-banner" id="apiBanner">
+    ⚠ Live API unavailable — showing cached measurements from April 2026.
+  </div>
+
+  <!-- ═══════════════════════════════ LLM TABLE ═══════════════════════════════ -->
+  <div class="section-header">
+    <span class="section-title">LLM Inference</span>
+    <span class="section-tag">TTFT P50</span>
+  </div>
+
+  <div class="table-scroll-hint">← scroll to see all columns →</div>
+  <div class="table-wrap">
+    <table class="claims-table" id="llmTable">
+      <thead>
+        <tr>
+          <th>Provider</th>
+          <th>Model</th>
+          <th>Their Claim</th>
+          <th>Our TTFT P50</th>
+          <th>Source</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="llmBody">
+        <!-- rows injected by JS -->
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════ STT TABLE ═══════════════════════════════ -->
+  <div class="section-header">
+    <span class="section-title">Speech-to-Text</span>
+    <span class="section-tag">END-TO-END LATENCY P50</span>
+  </div>
+
+  <div class="table-scroll-hint">← scroll to see all columns →</div>
+  <div class="table-wrap">
+    <table class="claims-table" id="sttTable">
+      <thead>
+        <tr>
+          <th>Provider</th>
+          <th>Model</th>
+          <th>Their Claim</th>
+          <th>Our Latency P50</th>
+          <th>Source</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="sttBody">
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ═══════════════════════════════ TTS TABLE ═══════════════════════════════ -->
+  <div class="section-header">
+    <span class="section-title">Text-to-Speech</span>
+    <span class="section-tag">TTFB P50</span>
+  </div>
+
+  <div class="table-scroll-hint">← scroll to see all columns →</div>
+  <div class="table-wrap">
+    <table class="claims-table" id="ttsTable">
+      <thead>
+        <tr>
+          <th>Provider</th>
+          <th>Model</th>
+          <th>Their Claim</th>
+          <th>Our TTFB P50</th>
+          <th>Source</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="ttsBody">
+      </tbody>
+    </table>
+  </div>
+
+  <p class="claims-footnote">
+    Found an error? <a href="mailto:hello@latencygrid.dev">Email hello@latencygrid.dev</a>
+  </p>
+
+</main>
+
+<!-- ===== MOBILE NAV TOGGLE ===== -->
+<script>
+  (function() {
+    var btn = document.getElementById('mobileToggle');
+    var links = document.getElementById('navLinks');
+    if (btn && links) {
+      btn.addEventListener('click', function() {
+        links.classList.toggle('open');
+      });
+    }
+  })();
+</script>
+
+<!-- ===== CLAIMS DATA + LIVE FETCH ===== -->
+<script>
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. HARDCODED PROVIDER CLAIMS (never change from API — these are what they published)
+// ─────────────────────────────────────────────────────────────────────────────
+
+var LLM_CLAIMS = [
+  {
+    provider: 'Groq',
+    model: 'moonshotai/kimi-k2-instruct',
+    modelShort: 'kimi-k2',
+    apiKey: 'moonshotai/kimi-k2-instruct',
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: null,
+    sourceLabel: null,
+    fallbackMs: 109
+  },
+  {
+    provider: 'Groq',
+    model: 'llama-3.1-8b-instant',
+    modelShort: 'llama-3.1-8b-instant',
+    apiKey: 'llama-3.1-8b-instant',
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: null,
+    sourceLabel: null,
+    fallbackMs: 114
+  },
+  {
+    provider: 'Groq',
+    model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+    modelShort: 'llama-4-scout-17b',
+    apiKey: 'meta-llama/llama-4-scout-17b-16e-instruct',
+    // Groq blog cites Artificial Analysis: 0.47s TTFT for Llama 4 Scout
+    claimMs: 470,
+    claimText: '~470ms TTFT (Artificial Analysis, Dec 2024)',
+    sourceUrl: 'https://groq.com/blog/new-ai-inference-speed-benchmark-for-llama-3-3-70b-powered-by-groq',
+    sourceLabel: 'groq.com blog',
+    fallbackMs: 166
+  },
+  {
+    provider: 'Groq',
+    model: 'llama-3.3-70b-versatile',
+    modelShort: 'llama-3.3-70b-versatile',
+    apiKey: 'llama-3.3-70b-versatile',
+    // Groq published blog: 276 tokens/sec, Artificial Analysis TTFT for 3.1 70B ~0.45s
+    claimMs: 450,
+    claimText: '~450ms TTFT (Artificial Analysis benchmark, Groq blog Dec 2024)',
+    sourceUrl: 'https://groq.com/blog/new-ai-inference-speed-benchmark-for-llama-3-3-70b-powered-by-groq',
+    sourceLabel: 'groq.com blog',
+    fallbackMs: 327
+  },
+  {
+    provider: 'OpenAI',
+    model: 'gpt-4o',
+    modelShort: 'gpt-4o',
+    apiKey: 'gpt-4o',
+    // OpenAI has not published a specific TTFT number for API; voice mode 320ms is separate
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: null,
+    sourceLabel: null,
+    fallbackMs: 380
+  },
+  {
+    provider: 'OpenAI',
+    model: 'gpt-4o-mini',
+    modelShort: 'gpt-4o-mini',
+    apiKey: 'gpt-4o-mini',
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: null,
+    sourceLabel: null,
+    fallbackMs: 508
+  },
+  {
+    provider: 'Anthropic',
+    model: 'claude-haiku-4-5-20251001',
+    modelShort: 'claude-haiku-4-5',
+    apiKey: 'claude-haiku-4-5-20251001',
+    // Anthropic announcement page: "runs up to 4-5x faster than Sonnet 4.5" — no specific ms
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: 'https://www.anthropic.com/news/claude-haiku-4-5',
+    sourceLabel: 'anthropic.com',
+    fallbackMs: 463
+  },
+  {
+    provider: 'Anthropic',
+    model: 'claude-sonnet-4-5-20250929',
+    modelShort: 'claude-sonnet-4-5',
+    apiKey: 'claude-sonnet-4-5-20250929',
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: null,
+    sourceLabel: null,
+    fallbackMs: 1361
+  },
+  {
+    provider: 'Google',
+    model: 'gemini-2.5-flash',
+    modelShort: 'gemini-2.5-flash',
+    apiKey: 'gemini-2.5-flash',
+    // Google describes Gemini 2.5 Flash as "optimized for low latency" — no specific TTFT ms published
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: 'https://developers.googleblog.com/en/gemini-2-5-flash-is-now-stable/',
+    sourceLabel: 'developers.googleblog.com',
+    fallbackMs: 936
+  }
+];
+
+var STT_CLAIMS = [
+  {
+    provider: 'Groq',
+    model: 'whisper-large-v3',
+    modelShort: 'whisper-large-v3',
+    apiKey: 'whisper-large-v3',
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: null,
+    sourceLabel: null,
+    fallbackMs: 360
+  },
+  {
+    provider: 'Groq',
+    model: 'whisper-large-v3-turbo',
+    modelShort: 'whisper-large-v3-turbo',
+    apiKey: 'whisper-large-v3-turbo',
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: null,
+    sourceLabel: null,
+    fallbackMs: 527
+  },
+  {
+    provider: 'Deepgram',
+    model: 'nova-3',
+    modelShort: 'nova-3',
+    apiKey: 'nova-3',
+    // Deepgram published: "300ms or less for streaming" — Nova-3 parity latency with Nova-2
+    claimMs: 300,
+    claimText: '≤300ms streaming latency',
+    sourceUrl: 'https://developers.deepgram.com/docs/measuring-streaming-latency',
+    sourceLabel: 'deepgram.com/docs',
+    fallbackMs: 583
+  },
+  {
+    provider: 'Deepgram',
+    model: 'nova-2',
+    modelShort: 'nova-2',
+    apiKey: 'nova-2',
+    claimMs: 300,
+    claimText: '≤300ms streaming latency',
+    sourceUrl: 'https://developers.deepgram.com/docs/measuring-streaming-latency',
+    sourceLabel: 'deepgram.com/docs',
+    fallbackMs: 622
+  },
+  {
+    provider: 'OpenAI',
+    model: 'gpt-4o-transcribe',
+    modelShort: 'gpt-4o-transcribe',
+    apiKey: 'gpt-4o-transcribe',
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: null,
+    sourceLabel: null,
+    fallbackMs: 799
+  },
+  {
+    provider: 'AssemblyAI',
+    model: 'universal-2',
+    modelShort: 'universal-2',
+    apiKey: 'universal-2',
+    // AssemblyAI blog: "approximately 300ms P50 latency" for Universal-Streaming
+    claimMs: 300,
+    claimText: '~300ms P50 latency',
+    sourceUrl: 'https://www.assemblyai.com/blog/real-time-speech-to-text',
+    sourceLabel: 'assemblyai.com/blog',
+    fallbackMs: 1725
+  }
+];
+
+var TTS_CLAIMS = [
+  {
+    provider: 'Deepgram',
+    model: 'aura-luna',
+    modelShort: 'aura-luna',
+    apiKey: 'aura-luna',
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: null,
+    sourceLabel: null,
+    fallbackMs: 156
+  },
+  {
+    provider: 'Cartesia',
+    model: 'sonic-2',
+    modelShort: 'sonic-2',
+    apiKey: 'sonic-2',
+    // Cartesia sonic page: "Sonic-2 achieves 90ms" (industry benchmark at P90)
+    claimMs: 90,
+    claimText: '90ms TTFA (Cartesia published benchmark)',
+    sourceUrl: 'https://cartesia.ai/sonic',
+    sourceLabel: 'cartesia.ai/sonic',
+    fallbackMs: 200
+  },
+  {
+    provider: 'LMNT',
+    model: 'aurora',
+    modelShort: 'aurora',
+    apiKey: 'aurora',
+    // LMNT docs: "consistently low latency (~150ms between input and output)"
+    claimMs: 150,
+    claimText: '~150ms (LMNT docs)',
+    sourceUrl: 'https://docs.lmnt.com/getting-started/text-to-speech-example',
+    sourceLabel: 'docs.lmnt.com',
+    fallbackMs: 298
+  },
+  {
+    provider: 'ElevenLabs',
+    model: 'eleven_flash_v2_5',
+    modelShort: 'flash-v2.5',
+    apiKey: 'eleven_flash_v2_5',
+    // ElevenLabs docs: "~75ms model inference" / "135ms end-to-end TTFB"
+    claimMs: 135,
+    claimText: '135ms TTFB (ElevenLabs docs)',
+    sourceUrl: 'https://elevenlabs.io/docs/eleven-api/concepts/latency',
+    sourceLabel: 'elevenlabs.io/docs',
+    fallbackMs: 374
+  },
+  {
+    provider: 'OpenAI',
+    model: 'tts-1',
+    modelShort: 'tts-1',
+    apiKey: 'tts-1',
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: null,
+    sourceLabel: null,
+    fallbackMs: 1050
+  },
+  {
+    provider: 'Fish Audio',
+    model: 'default',
+    modelShort: 'default',
+    apiKey: 'default',
+    claimMs: null,
+    claimText: 'No published claim',
+    sourceUrl: null,
+    sourceLabel: null,
+    fallbackMs: 2511
+  }
+];
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. STATUS LOGIC
+// ─────────────────────────────────────────────────────────────────────────────
+
+function computeStatus(claimMs, measuredMs) {
+  if (claimMs === null) return 'none';
+  var ratio = measuredMs / claimMs;
+  if (ratio <= 0.8)  return 'faster';   // we measured ≥20% better
+  if (ratio <= 1.2)  return 'matches';  // within 20%
+  return 'slower';                       // >20% worse
+}
+
+function statusBadge(status, loading) {
+  if (loading) {
+    return '<span class="status-badge status-loading">—</span>';
+  }
+  switch (status) {
+    case 'faster':
+      return '<span class="status-badge status-faster">↑ Faster than claimed</span>';
+    case 'matches':
+      return '<span class="status-badge status-matches">✓ Matches</span>';
+    case 'slower':
+      return '<span class="status-badge status-slower">↓ Slower than claimed</span>';
+    default:
+      return '<span class="status-badge status-none">No published claim</span>';
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. TABLE RENDERING
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderTable(tbodyId, rows, liveData, loading) {
+  var tbody = document.getElementById(tbodyId);
+  if (!tbody) return;
+
+  tbody.innerHTML = rows.map(function(row) {
+    var liveMs = null;
+    var isCached = false;
+
+    if (!loading && liveData) {
+      liveMs = liveData[row.apiKey] || null;
+    }
+
+    var displayMs;
+    if (loading) {
+      displayMs = '<span class="measured-loading">—</span>';
+    } else if (liveMs !== null) {
+      displayMs = '<span class="measured-value">' + Math.round(liveMs) + 'ms</span>';
+    } else {
+      displayMs = '<span class="measured-cached">' + row.fallbackMs + 'ms<span class="cached-label">(cached)</span></span>';
+      isCached = true;
+    }
+
+    var measuredForStatus = liveMs !== null ? liveMs : row.fallbackMs;
+    var status = loading ? 'loading' : computeStatus(row.claimMs, measuredForStatus);
+
+    var claimCell = row.claimMs !== null
+      ? '<span class="claim-value">' + row.claimText + '</span>'
+      : '<span class="claim-none">No published claim</span>';
+
+    var sourceCell = row.sourceUrl
+      ? '<a href="' + row.sourceUrl + '" target="_blank" rel="noopener" class="source-link">' + row.sourceLabel + ' ↗</a>'
+      : '<span class="source-none">—</span>';
+
+    var trClass = (row.claimMs === null) ? 'no-claim' : '';
+
+    return '<tr class="' + trClass + '">'
+      + '<td><span class="provider-name">' + row.provider + '</span></td>'
+      + '<td><span class="model-name">' + row.modelShort + '</span></td>'
+      + '<td>' + claimCell + '</td>'
+      + '<td>' + displayMs + '</td>'
+      + '<td>' + sourceCell + '</td>'
+      + '<td>' + statusBadge(status, loading) + '</td>'
+      + '</tr>';
+  }).join('');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. LIVE API FETCH
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Initial render with loading state
+renderTable('llmBody', LLM_CLAIMS, null, true);
+renderTable('sttBody', STT_CLAIMS, null, true);
+renderTable('ttsBody', TTS_CLAIMS, null, true);
+
+function timeAgo(isoStr) {
+  var d = new Date(isoStr);
+  var now = Date.now();
+  var diffMs = now - d.getTime();
+  var diffMins = Math.round(diffMs / 60000);
+  var diffHrs = Math.round(diffMs / 3600000);
+  var diffDays = Math.round(diffMs / 86400000);
+
+  if (diffMins < 2)  return 'just now';
+  if (diffMins < 60) return diffMins + ' minutes ago';
+  if (diffHrs < 48)  return diffHrs + ' hour' + (diffHrs !== 1 ? 's' : '') + ' ago';
+  return diffDays + ' day' + (diffDays !== 1 ? 's' : '') + ' ago';
+}
+
+function updateFreshnessUI(timestamp) {
+  var text = document.getElementById('lastUpdatedText');
+  var dot  = document.getElementById('freshnessDot');
+  if (!text) return;
+
+  var ageMs = Date.now() - new Date(timestamp).getTime();
+  var ageHrs = ageMs / 3600000;
+
+  text.textContent = 'Last updated: ' + timeAgo(timestamp);
+
+  if (dot) {
+    if (ageHrs < 6) {
+      dot.classList.add('fresh');
+    } else {
+      dot.classList.remove('fresh');
+    }
+  }
+}
+
+function showApiError() {
+  var banner = document.getElementById('apiBanner');
+  if (banner) banner.style.display = 'block';
+  var text = document.getElementById('lastUpdatedText');
+  if (text) text.textContent = 'Live data unavailable — showing cached measurements';
+}
+
+(function loadLiveData() {
+  fetch('https://api.latencygrid.dev/results')
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(function(listData) {
+      if (!listData.success || !listData.submissions || listData.submissions.length === 0) {
+        throw new Error('No submissions');
+      }
+
+      // Find the submission with the most complete data (highest combined count)
+      var best = listData.submissions.reduce(function(acc, sub) {
+        var score = (sub.llm_count || 0) + (sub.stt_count || 0) + (sub.tts_count || 0);
+        var accScore = (acc.llm_count || 0) + (acc.stt_count || 0) + (acc.tts_count || 0);
+        return score > accScore ? sub : acc;
+      });
+
+      // Fetch that submission's detail
+      return fetch('https://api.latencygrid.dev/results/' + best.id)
+        .then(function(r) {
+          if (!r.ok) throw new Error('HTTP ' + r.status);
+          return r.json();
+        })
+        .then(function(detail) {
+          if (!detail.success || !detail.submission) throw new Error('No detail');
+          return { submission: detail.submission, timestamp: best.timestamp };
+        });
+    })
+    .then(function(result) {
+      var sub = result.submission;
+
+      // Build lookup maps: modelKey → p50 ms
+      var llmMap = {};
+      var sttMap = {};
+      var ttsMap = {};
+
+      if (Array.isArray(sub.llm)) {
+        sub.llm.forEach(function(item) {
+          if (item.error_rate < 1 && item.ttft_p50 > 0) {
+            llmMap[item.model] = item.ttft_p50;
+          }
+        });
+      }
+
+      if (Array.isArray(sub.stt)) {
+        sub.stt.forEach(function(item) {
+          if (item.error_rate < 1) {
+            // Use total_p50 for STT end-to-end latency
+            var val = item.total_p50 || item.latency_p50 || item.ttft_p50 || null;
+            if (val && val > 0) sttMap[item.model] = val;
+          }
+        });
+      }
+
+      if (Array.isArray(sub.tts)) {
+        sub.tts.forEach(function(item) {
+          if (item.error_rate < 1) {
+            var val = item.ttfb_p50 || item.total_p50 || item.latency_p50 || null;
+            if (val && val > 0) ttsMap[item.model] = val;
+          }
+        });
+      }
+
+      // Re-render with live data
+      renderTable('llmBody', LLM_CLAIMS, llmMap, false);
+      renderTable('sttBody', STT_CLAIMS, sttMap, false);
+      renderTable('ttsBody', TTS_CLAIMS, ttsMap, false);
+
+      updateFreshnessUI(result.timestamp);
+    })
+    .catch(function(err) {
+      console.warn('LatencyGrid claims: API fetch failed —', err.message);
+      // Fall back to cached numbers
+      renderTable('llmBody', LLM_CLAIMS, null, false);
+      renderTable('sttBody', STT_CLAIMS, null, false);
+      renderTable('ttsBody', TTS_CLAIMS, null, false);
+      showApiError();
+    });
+})();
+</script>
+
+</body>
+</html>
