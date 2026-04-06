@@ -73,7 +73,7 @@ a { color: inherit; text-decoration: none; }
   letter-spacing: -0.02em;
 }
 
-.nav-links {
+.nav-links, .nav-links li {
   display: flex;
   align-items: center;
   gap: 4px;
@@ -818,7 +818,7 @@ footer {
   .nav { padding: 0 20px; }
   .container { padding: 0 20px; }
 
-  .nav-links {
+  .nav-links, .nav-links li {
     display: none;
     position: absolute;
     top: var(--nav-height);
@@ -861,4 +861,35 @@ footer {
   .hero-tag { font-size: 10px; }
   .hero-sub { font-size: 14px; }
   .stat-number { font-size: 28px; }
+}
+
+/* === FIXES === */
+.nav-links li { list-style: none; }
+
+/* Ensure stat cards are always visually distinct */
+.stat-card {
+  background: #111113 !important;
+  border: 1px solid #2a2a30 !important;
+}
+
+/* Mobile: keep stat cards looking like cards even when stacked */
+@media (max-width: 768px) {
+  .stat-card {
+    padding: 20px;
+    border-radius: 10px;
+  }
+  
+  .stat-number {
+    font-size: 32px;
+  }
+  
+  /* Pipeline bar visible on mobile */
+  .pipeline-bar-wrapper {
+    height: 40px;
+  }
+  
+  .bar-seg {
+    font-size: 10px;
+    padding: 0 6px;
+  }
 }
