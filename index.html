@@ -9,6 +9,15 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css?v=2" />
+  <style>
+    @keyframes loadingPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.35; }
+    }
+    .loading-pulse {
+      animation: loadingPulse 1.2s ease-in-out infinite;
+    }
+  </style>
 </head>
 <body>
 
@@ -61,20 +70,20 @@
 
       <!-- Fastest LLM -->
       <div class="stat-card">
-        <div class="stat-number white">109ms</div>
+        <div class="stat-number white" id="heroFastestLLM">109ms</div>
         <div class="stat-label-row">
           <div class="stat-label">Fastest LLM TTFT</div>
         </div>
-        <div class="stat-meta">kimi-k2 via groq</div>
+        <div class="stat-meta" id="heroFastestLLMmeta">kimi-k2 via groq</div>
       </div>
 
       <!-- Fastest TTS -->
       <div class="stat-card">
-        <div class="stat-number white">156ms</div>
+        <div class="stat-number white" id="heroFastestTTS">156ms</div>
         <div class="stat-label-row">
           <div class="stat-label">Fastest TTS TTFB</div>
         </div>
-        <div class="stat-meta">deepgram aura-luna</div>
+        <div class="stat-meta" id="heroFastestTTSmeta">deepgram aura-luna</div>
       </div>
     </div>
   </div>
@@ -91,13 +100,15 @@
     </div>
 
     <div class="meta-strip">
-      <span>Ottawa, Canada</span>
+      <span id="metaLocation">Ottawa, Canada</span>
       <span class="meta-sep">·</span>
-      <span>April 5, 2026</span>
+      <span id="metaDate">April 5, 2026</span>
       <span class="meta-sep">·</span>
-      <span>5 runs</span>
+      <span id="metaRuns">5 runs</span>
       <span class="meta-sep">·</span>
-      <span>modelping v0.1.0</span>
+      <span id="metaVersion">modelping v0.1.0</span>
+      <span class="meta-sep" id="metaFreshnessSep" style="display:none">·</span>
+      <span id="metaFreshness" style="display:none"></span>
     </div>
 
     <!-- Tabs -->
@@ -155,7 +166,7 @@
               <th>Tok/s</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="llmTableBody">
             <tr>
               <td class="model-name">kimi-k2</td>
               <td><div class="provider-cell"><div class="provider-dot" style="background:#f55036"></div>groq</div></td>
@@ -242,7 +253,7 @@
               <th>Latency P50</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="sttTableBody">
             <tr>
               <td class="model-name">whisper-large-v3</td>
               <td><div class="provider-cell"><div class="provider-dot" style="background:#f55036"></div>groq</div></td>
@@ -300,7 +311,7 @@
               <th>Realtime Factor</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody id="ttsTableBody">
             <tr>
               <td class="model-name">aura-luna</td>
               <td><div class="provider-cell"><div class="provider-dot" style="background:#13ebe0"></div>deepgram</div></td>
@@ -743,6 +754,285 @@
 
   document.getElementById('llmSelect').addEventListener('change', updateMatrix);
   updateMatrix();
+
+  // ===== LIVE DATA FETCHING =====
+  (function() {
+    const API_BASE = 'https://api.latencygrid.dev';
+
+    const PROVIDER_COLORS = {
+      openai: '#74aa9c', anthropic: '#d4a5a5', google: '#4285f4',
+      groq: '#f55036', fireworks: '#6366f1', together: '#f59e0b',
+      mistral: '#ff6b6b', cohere: '#39d353',
+      deepgram: '#13ebe0', deepgram_stt: '#13ebe0', deepgram_tts: '#13ebe0',
+      cartesia: '#fc4b0b', elevenlabs: '#f59e0b', assemblyai: '#6366f1',
+      lmnt: '#3b82f6', openai_stt: '#74aa9c', gladia: '#a78bfa',
+      'fish-audio': '#ec4899', playht: '#8b5cf6'
+    };
+
+    function providerColor(provider) {
+      if (!provider) return '#888';
+      var key = provider.toLowerCase().replace(/[_-]/g, '').replace('stt','').replace('tts','');
+      for (var k in PROVIDER_COLORS) {
+        if (k.replace(/[_-]/g, '') === key) return PROVIDER_COLORS[k];
+      }
+      return PROVIDER_COLORS[provider] || '#888';
+    }
+
+    function formatDate(ts) {
+      try {
+        var d = new Date(ts);
+        return d.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+      } catch(e) { return ts; }
+    }
+
+    function timeAgo(ts) {
+      try {
+        var diff = Math.floor((Date.now() - new Date(ts).getTime()) / 1000);
+        if (diff < 60) return diff + 's ago';
+        if (diff < 3600) return Math.floor(diff/60) + 'm ago';
+        if (diff < 86400) return Math.floor(diff/3600) + 'h ago';
+        return Math.floor(diff/86400) + 'd ago';
+      } catch(e) { return ''; }
+    }
+
+    function setLoading() {
+      var llmEl = document.getElementById('heroFastestLLM');
+      var ttsEl = document.getElementById('heroFastestTTS');
+      if (llmEl) llmEl.classList.add('loading-pulse');
+      if (ttsEl) ttsEl.classList.add('loading-pulse');
+
+      var llmBody = document.getElementById('llmTableBody');
+      var sttBody = document.getElementById('sttTableBody');
+      var ttsBody = document.getElementById('ttsTableBody');
+      var loadingRow = '<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:18px">Loading…</td></tr>';
+      if (llmBody) llmBody.innerHTML = loadingRow;
+      if (sttBody) sttBody.innerHTML = '<tr><td colspan="3" style="text-align:center;color:var(--text-muted);padding:18px">Loading…</td></tr>';
+      if (ttsBody) ttsBody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-muted);padding:18px">Loading…</td></tr>';
+    }
+
+    function clearLoading() {
+      var llmEl = document.getElementById('heroFastestLLM');
+      var ttsEl = document.getElementById('heroFastestTTS');
+      if (llmEl) llmEl.classList.remove('loading-pulse');
+      if (ttsEl) ttsEl.classList.remove('loading-pulse');
+    }
+
+    function restoreHardcodedTables() {
+      // On fetch error, restore hardcoded fallback rows
+      var llmBody = document.getElementById('llmTableBody');
+      if (llmBody) llmBody.innerHTML = [
+        ['kimi-k2','groq','109ms','157ms','175.3','latency-green'],
+        ['llama-3.1-8b-instant','groq','114ms','130ms','387.0','latency-green'],
+        ['llama-4-scout-17b','groq','166ms','275ms','234.7','latency-green'],
+        ['llama-3.3-70b-versatile','groq','327ms','378ms','181.6','latency-white'],
+        ['gpt-4o','openai','380ms','451ms','81.6','latency-white'],
+        ['claude-haiku-4-5','anthropic','463ms','1700ms','68.8','latency-white'],
+        ['gpt-4o-mini','openai','508ms','549ms','44.0','latency-white'],
+        ['gemini-2.5-flash','google','936ms','1100ms','45.2','latency-white'],
+        ['o3-mini','openai','956ms','1508ms','70.1','latency-red'],
+        ['claude-sonnet-4-5','anthropic','1361ms','1792ms','31.4','latency-red']
+      ].map(function(r) {
+        return '<tr><td class="model-name">'+r[0]+'</td><td><div class="provider-cell"><div class="provider-dot" style="background:'+providerColor(r[1])+'"></div>'+r[1]+'</div></td><td class="'+r[5]+'">'+r[2]+'</td><td class="mono">'+r[3]+'</td><td class="mono">'+r[4]+'</td></tr>';
+      }).join('');
+
+      var sttBody = document.getElementById('sttTableBody');
+      if (sttBody) sttBody.innerHTML = [
+        ['whisper-large-v3','groq','360ms'],
+        ['whisper-large-v3-turbo','groq','527ms'],
+        ['nova-3','deepgram','583ms'],
+        ['nova-2','deepgram','622ms'],
+        ['gpt-4o-transcribe','openai','799ms'],
+        ['universal-2','assemblyai','1725ms'],
+        ['universal-3-pro','assemblyai','2855ms'],
+        ['default','gladia','3452ms']
+      ].map(function(r) {
+        return '<tr><td class="model-name">'+r[0]+'</td><td><div class="provider-cell"><div class="provider-dot" style="background:'+providerColor(r[1])+'"></div>'+r[1]+'</div></td><td class="mono">'+r[2]+'</td></tr>';
+      }).join('');
+
+      var ttsBody = document.getElementById('ttsTableBody');
+      if (ttsBody) ttsBody.innerHTML = [
+        ['aura-luna','deepgram','156ms','2.7x','rtf-yellow'],
+        ['sonic-2','cartesia','200ms','3.9x','rtf-yellow'],
+        ['sonic-english','cartesia','210ms','1.9x','rtf-red'],
+        ['aurora','lmnt','298ms','2.8x','rtf-yellow'],
+        ['blizzard','lmnt','310ms','3.5x','rtf-yellow'],
+        ['flash-v2.5','elevenlabs','374ms','11.3x','rtf-green'],
+        ['tts-1','openai','1050ms','3.6x','rtf-yellow'],
+        ['multilingual-v2','elevenlabs','1277ms','4.0x','rtf-yellow'],
+        ['tts-1-hd','openai','2010ms','2.3x','rtf-yellow'],
+        ['default','fish-audio','2511ms','2.9x','rtf-yellow']
+      ].map(function(r) {
+        return '<tr><td class="model-name">'+r[0]+'</td><td><div class="provider-cell"><div class="provider-dot" style="background:'+providerColor(r[1])+'"></div>'+r[1]+'</div></td><td class="mono">'+r[2]+'</td><td class="'+r[4]+'">'+r[3]+'</td></tr>';
+      }).join('');
+    }
+
+    function renderLLMTable(llmData) {
+      var body = document.getElementById('llmTableBody');
+      if (!body || !llmData || !llmData.length) return;
+      var valid = llmData.filter(function(m) { return m.error_rate < 1; });
+      valid.sort(function(a, b) { return a.ttft_p50 - b.ttft_p50; });
+      var n = valid.length;
+      body.innerHTML = valid.map(function(m, i) {
+        var color;
+        if (i < 3) color = '#22c55e';
+        else if (i >= n - 2) color = '#ef4444';
+        else color = '#fafafa';
+        var dotColor = providerColor(m.provider);
+        var providerLabel = m.provider || '';
+        var toks = m.throughput_p50 != null ? m.throughput_p50.toFixed(1) : '—';
+        var p95 = m.ttft_p95 != null ? Math.round(m.ttft_p95) + 'ms' : '—';
+        return '<tr>' +
+          '<td class="model-name">' + m.model + '</td>' +
+          '<td><div class="provider-cell"><div class="provider-dot" style="background:' + dotColor + '"></div>' + providerLabel + '</div></td>' +
+          '<td style="color:' + color + ';font-family:var(--font-mono)">' + Math.round(m.ttft_p50) + 'ms</td>' +
+          '<td class="mono">' + p95 + '</td>' +
+          '<td class="mono">' + toks + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function renderSTTTable(sttData) {
+      var body = document.getElementById('sttTableBody');
+      if (!body || !sttData || !sttData.length) return;
+      var sorted = sttData.slice().sort(function(a,b){ return a.latency_p50 - b.latency_p50; });
+      body.innerHTML = sorted.map(function(m) {
+        var parts = (m.model || '').split('/');
+        var modelLabel = parts[parts.length - 1];
+        var providerLabel = m.provider || '';
+        var dotColor = providerColor(m.provider);
+        return '<tr>' +
+          '<td class="model-name">' + modelLabel + '</td>' +
+          '<td><div class="provider-cell"><div class="provider-dot" style="background:' + dotColor + '"></div>' + providerLabel + '</div></td>' +
+          '<td class="mono">' + Math.round(m.latency_p50) + 'ms</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function renderTTSTable(ttsData) {
+      var body = document.getElementById('ttsTableBody');
+      if (!body || !ttsData || !ttsData.length) return;
+      var sorted = ttsData.slice().sort(function(a,b){
+        var av = a.ttfb_p50 != null ? a.ttfb_p50 : (a.ttfb_ms != null ? a.ttfb_ms : Infinity);
+        var bv = b.ttfb_p50 != null ? b.ttfb_p50 : (b.ttfb_ms != null ? b.ttfb_ms : Infinity);
+        return av - bv;
+      });
+      body.innerHTML = sorted.map(function(m) {
+        var parts = (m.model || '').split('/');
+        var modelLabel = parts[parts.length - 1];
+        var providerLabel = m.provider || '';
+        var dotColor = providerColor(m.provider);
+        var ttfb = m.ttfb_p50 != null ? m.ttfb_p50 : (m.ttfb_ms != null ? m.ttfb_ms : null);
+        var ttfbStr = ttfb != null ? Math.round(ttfb) + 'ms' : '—';
+        var rtf = m.rtf != null ? m.rtf : null;
+        var rtfStr = '—', rtfClass = '';
+        if (rtf != null) {
+          rtfStr = rtf.toFixed(1) + 'x';
+          if (rtf > 5) rtfClass = 'rtf-green';
+          else if (rtf >= 2) rtfClass = 'rtf-yellow';
+          else rtfClass = 'rtf-red';
+        }
+        return '<tr>' +
+          '<td class="model-name">' + modelLabel + '</td>' +
+          '<td><div class="provider-cell"><div class="provider-dot" style="background:' + dotColor + '"></div>' + providerLabel + '</div></td>' +
+          '<td class="mono">' + ttfbStr + '</td>' +
+          '<td class="' + rtfClass + '">' + rtfStr + '</td>' +
+          '</tr>';
+      }).join('');
+    }
+
+    function applySubmissionData(sub) {
+      var llm = sub.llm || [];
+      var stt = sub.stt || [];
+      var tts = sub.tts || [];
+
+      // Hero: Fastest LLM
+      var validLLM = llm.filter(function(m){ return m.error_rate < 1; });
+      if (validLLM.length) {
+        var bestLLM = validLLM.reduce(function(a, b){ return a.ttft_p50 < b.ttft_p50 ? a : b; });
+        document.getElementById('heroFastestLLM').textContent = Math.round(bestLLM.ttft_p50) + 'ms';
+        document.getElementById('heroFastestLLMmeta').textContent = bestLLM.model + ' via ' + (bestLLM.provider || '');
+      }
+
+      // Hero: Fastest TTS
+      if (tts.length) {
+        var bestTTS = tts.reduce(function(a, b){
+          var av = a.ttfb_p50 != null ? a.ttfb_p50 : (a.ttfb_ms != null ? a.ttfb_ms : Infinity);
+          var bv = b.ttfb_p50 != null ? b.ttfb_p50 : (b.ttfb_ms != null ? b.ttfb_ms : Infinity);
+          return av < bv ? a : b;
+        });
+        var bestTTFB = bestTTS.ttfb_p50 != null ? bestTTS.ttfb_p50 : (bestTTS.ttfb_ms != null ? bestTTS.ttfb_ms : null);
+        if (bestTTFB != null) {
+          document.getElementById('heroFastestTTS').textContent = Math.round(bestTTFB) + 'ms';
+          var ttsParts = (bestTTS.model || '').split('/');
+          document.getElementById('heroFastestTTSmeta').textContent = ttsParts[ttsParts.length - 1];
+        }
+      }
+
+      // Metadata strip
+      document.getElementById('metaLocation').textContent = sub.location || '';
+      document.getElementById('metaDate').textContent = formatDate(sub.timestamp);
+      document.getElementById('metaRuns').textContent = (llm[0] && llm[0].runs ? llm[0].runs : 5) + ' runs';
+      document.getElementById('metaVersion').textContent = 'modelping ' + (sub.modelping_version || 'v0.1.0');
+
+      // Freshness
+      var ago = timeAgo(sub.timestamp);
+      if (ago) {
+        var sepEl = document.getElementById('metaFreshnessSep');
+        var freshnessEl = document.getElementById('metaFreshness');
+        if (sepEl) sepEl.style.display = '';
+        if (freshnessEl) {
+          freshnessEl.textContent = 'Last updated: ' + ago;
+          freshnessEl.style.display = '';
+        }
+      }
+
+      // Tables
+      renderLLMTable(llm);
+      renderSTTTable(stt);
+      renderTTSTable(tts);
+    }
+
+    function findBestSubmission(submissions) {
+      // Prefer most recent with all three (llm, stt, tts)
+      // index doesn't have arrays, so just pick most recent — detail fetch will tell us
+      // Sort by timestamp descending
+      var sorted = submissions.slice().sort(function(a,b){
+        return new Date(b.timestamp) - new Date(a.timestamp);
+      });
+      // Prefer ones that have fastest_llm_ms AND fastest_stt_ms AND fastest_tts_ms
+      var full = sorted.filter(function(s){
+        return s.fastest_llm_ms != null && s.fastest_stt_ms != null && s.fastest_tts_ms != null;
+      });
+      return (full.length ? full[0] : sorted[0]) || null;
+    }
+
+    async function loadLiveData() {
+      setLoading();
+      try {
+        var res = await fetch(API_BASE + '/results');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        var data = await res.json();
+        if (!data.success || !data.submissions || !data.submissions.length) throw new Error('No submissions');
+
+        var best = findBestSubmission(data.submissions);
+        if (!best) throw new Error('No best submission');
+
+        var detailRes = await fetch(API_BASE + '/results/' + best.id);
+        if (!detailRes.ok) throw new Error('Detail HTTP ' + detailRes.status);
+        var detailData = await detailRes.json();
+        if (!detailData.success || !detailData.submission) throw new Error('No submission detail');
+
+        clearLoading();
+        applySubmissionData(detailData.submission);
+      } catch(err) {
+        console.error('[LatencyGrid] Live data fetch failed:', err);
+        clearLoading();
+        restoreHardcodedTables();
+      }
+    }
+
+    loadLiveData();
+  })();
 
   // ===== COPY TO CLIPBOARD =====
   document.getElementById('copyBtn').addEventListener('click', function() {
