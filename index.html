@@ -118,16 +118,37 @@
         <span class="lb-meta-badge">modelping v0.1.0</span>
       </div>
 
+      <!-- Hero stat bar -->
+      <div class="hero-stat-bar">
+        <div class="hero-stat-item">
+          <span class="hero-stat-label">Fastest voice pipeline today</span>
+          <span class="hero-stat-value" id="heroFastestPipeline">317ms</span>
+          <span class="hero-stat-meta">groq/whisper → groq/llama-3.3-70b → cartesia/sonic-2 · Ottawa, Canada</span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat-item">
+          <span class="hero-stat-label">Fastest LLM TTFT</span>
+          <span class="hero-stat-value" id="heroFastestLLM">109ms</span>
+          <span class="hero-stat-meta">kimi-k2 via groq</span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat-item">
+          <span class="hero-stat-label">Fastest TTS response</span>
+          <span class="hero-stat-value" id="heroFastestTTS">156ms</span>
+          <span class="hero-stat-meta">deepgram aura-luna</span>
+        </div>
+      </div>
+
       <!-- Tabs -->
       <div class="lb-tabs" role="tablist">
-        <button class="lb-tab active" data-tab="llm" role="tab" aria-selected="true">LLM</button>
+        <button class="lb-tab active" data-tab="pipeline" role="tab" aria-selected="true">Pipeline</button>
+        <button class="lb-tab" data-tab="llm" role="tab" aria-selected="false">LLM</button>
         <button class="lb-tab" data-tab="stt" role="tab" aria-selected="false">STT</button>
         <button class="lb-tab" data-tab="tts" role="tab" aria-selected="false">TTS</button>
-        <button class="lb-tab" data-tab="pipeline" role="tab" aria-selected="false">Pipeline</button>
       </div>
 
       <!-- ── LLM Tab ── -->
-      <div class="lb-panel" id="tab-llm">
+      <div class="lb-panel" id="tab-llm" style="display:none">
         <div class="lb-table-wrap">
           <table class="lb-table">
             <thead>
@@ -350,7 +371,7 @@
       </div>
 
       <!-- ── Pipeline Tab ── -->
-      <div class="lb-panel" id="tab-pipeline" style="display:none">
+      <div class="lb-panel" id="tab-pipeline">
         <div class="lb-pipeline">
           <div class="pipeline-route">
             groq/whisper-large-v3-turbo → groq/llama-3.3-70b → cartesia/sonic-2
@@ -390,6 +411,58 @@
           Submit your benchmarks →
         </a>
       </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════
+       PIPELINE MATRIX
+  ════════════════════════════════════════════ -->
+  <section class="section matrix-section" id="pipeline-matrix">
+    <div class="container">
+      <h2 class="section-title">Pipeline Latency Matrix</h2>
+      <p class="section-sub">Total STT → LLM → TTS latency. Fixed LLM: groq/llama-3.3-70b (140ms TTFT). Lower is better.</p>
+      <div class="matrix-table-wrap">
+        <table class="matrix-table">
+          <thead>
+            <tr>
+              <th class="matrix-corner">STT \ TTS</th>
+              <th>Cartesia Sonic-2</th>
+              <th>Deepgram Luna</th>
+              <th>ElevenLabs Flash</th>
+              <th>LMNT Aurora</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="matrix-row-label">Groq Whisper</td>
+              <td class="matrix-cell cell-green">700ms</td>
+              <td class="matrix-cell cell-green">656ms</td>
+              <td class="matrix-cell cell-yellow">874ms</td>
+              <td class="matrix-cell cell-yellow">798ms</td>
+            </tr>
+            <tr>
+              <td class="matrix-row-label">Deepgram Nova-3</td>
+              <td class="matrix-cell cell-yellow">923ms</td>
+              <td class="matrix-cell cell-yellow">879ms</td>
+              <td class="matrix-cell cell-red">1097ms</td>
+              <td class="matrix-cell cell-red">1021ms</td>
+            </tr>
+            <tr>
+              <td class="matrix-row-label">OpenAI Whisper</td>
+              <td class="matrix-cell cell-red">1139ms</td>
+              <td class="matrix-cell cell-red">1095ms</td>
+              <td class="matrix-cell cell-red">1313ms</td>
+              <td class="matrix-cell cell-red">1237ms</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="matrix-legend">
+        <span class="matrix-legend-item"><span class="matrix-legend-dot cell-green"></span>&lt; 750ms</span>
+        <span class="matrix-legend-item"><span class="matrix-legend-dot cell-yellow"></span>750–1000ms</span>
+        <span class="matrix-legend-item"><span class="matrix-legend-dot cell-red"></span>&gt; 1000ms</span>
+      </div>
+      <p class="matrix-note">Run <code>modelping pipeline --stt all --llm llama-3.3-70b-versatile --tts all</code> to reproduce.</p>
     </div>
   </section>
 
