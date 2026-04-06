@@ -11,334 +11,49 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
   <link rel="icon" type="image/svg+xml" href="/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
   <link rel="apple-touch-icon" href="/favicon-32.png">
 
   <style>
-    .claims-page {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 80px 24px 120px;
-    }
-
-    /* ── Header ── */
-    .page-badge {
-      display: inline-block;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      font-weight: 500;
-      color: var(--accent);
-      background: rgba(0, 255, 136, 0.1);
-      border: 1px solid rgba(0, 255, 136, 0.2);
-      border-radius: 4px;
-      padding: 4px 10px;
-      margin-bottom: 16px;
-    }
-
-    .page-title {
-      font-size: clamp(28px, 5vw, 42px);
-      font-weight: 800;
-      color: var(--fg);
-      margin: 0 0 12px;
-      letter-spacing: -0.02em;
-    }
-
-    .page-sub {
-      font-size: 16px;
-      color: var(--fg-muted);
-      margin: 0 0 32px;
-      line-height: 1.6;
-      max-width: 680px;
-    }
-
-    /* ── Methodology box ── */
-    .methodology-box {
-      background: #0d0d0d;
-      border: 1px solid #1e1e1e;
-      border-left: 3px solid var(--accent);
-      border-radius: 8px;
-      padding: 20px 24px;
-      margin-bottom: 12px;
-    }
-
-    .methodology-label {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--accent);
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 8px;
-    }
-
-    .methodology-text {
-      font-size: 13px;
-      color: var(--fg-muted);
-      line-height: 1.7;
-      margin: 0;
-    }
-
-    .last-updated {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: #52525b;
-      margin-bottom: 40px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .last-updated-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: #52525b;
-      display: inline-block;
-    }
-
-    .last-updated-dot.fresh {
-      background: var(--accent);
-      box-shadow: 0 0 6px rgba(0, 255, 136, 0.5);
-    }
-
-    /* ── Section headers ── */
-    .section-header {
-      display: flex;
-      align-items: baseline;
-      gap: 12px;
-      margin: 48px 0 16px;
-    }
-
-    .section-title {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--fg);
-      letter-spacing: -0.01em;
-    }
-
-    .section-tag {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      color: var(--fg-muted);
-      background: #1a1a1a;
-      border: 1px solid #2a2a2a;
-      border-radius: 4px;
-      padding: 2px 7px;
-    }
-
-    /* ── Table wrapper ── */
-    .table-wrap {
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-      border: 1px solid #1e1e1e;
-      border-radius: 10px;
-      margin-bottom: 8px;
-    }
-
-    .claims-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 13px;
-      min-width: 700px;
-    }
-
-    .claims-table thead th {
-      padding: 12px 16px;
-      text-align: left;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--fg-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.07em;
-      background: #0d0d0d;
-      border-bottom: 1px solid #1e1e1e;
-      white-space: nowrap;
-    }
-
-    .claims-table thead th:first-child { border-radius: 10px 0 0 0; }
-    .claims-table thead th:last-child  { border-radius: 0 10px 0 0; }
-
-    .claims-table tbody tr {
-      border-bottom: 1px solid #111;
-      transition: background 0.12s;
-    }
-
-    .claims-table tbody tr:last-child { border-bottom: none; }
-    .claims-table tbody tr:hover { background: rgba(255,255,255,0.02); }
-
-    .claims-table tbody td {
-      padding: 13px 16px;
-      color: var(--fg);
-      vertical-align: middle;
-    }
-
-    /* No-claim rows are muted */
-    .claims-table tbody tr.no-claim td {
-      opacity: 0.55;
-    }
-
-    /* Provider + Model cells */
-    .provider-name {
-      font-weight: 600;
-      color: var(--fg);
-    }
-
-    .model-name {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: var(--fg-muted);
-    }
-
-    /* Claim cell */
-    .claim-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-    }
-
-    .claim-none {
-      font-size: 12px;
-      color: #52525b;
-      font-style: italic;
-    }
-
-    /* Measured cell */
-    .measured-value {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--fg);
-    }
-
-    .measured-loading {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: #52525b;
-      animation: loadingPulse 1.2s ease-in-out infinite;
-    }
-
-    .measured-cached {
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 12px;
-      color: #52525b;
-    }
-
-    .cached-label {
-      font-size: 10px;
-      color: #3f3f46;
-      margin-left: 4px;
-      font-family: 'Inter', sans-serif;
-    }
-
-    /* Source cell */
-    .source-link {
-      font-size: 12px;
-      color: var(--accent);
-      text-decoration: none;
-      opacity: 0.7;
-      transition: opacity 0.15s;
-    }
-    .source-link:hover { opacity: 1; }
-
-    .source-none {
-      font-size: 12px;
-      color: #3f3f46;
-    }
-
-    /* Status badges */
-    .status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: 11px;
-      font-weight: 600;
-      font-family: 'JetBrains Mono', monospace;
-      padding: 3px 9px;
-      border-radius: 5px;
-      white-space: nowrap;
-    }
-
-    .status-matches {
-      color: #4ade80;
-      background: rgba(74, 222, 128, 0.1);
-      border: 1px solid rgba(74, 222, 128, 0.2);
-    }
-
-    .status-faster {
-      color: #22d3ee;
-      background: rgba(34, 211, 238, 0.1);
-      border: 1px solid rgba(34, 211, 238, 0.2);
-    }
-
-    .status-slower {
-      color: #fb923c;
-      background: rgba(251, 146, 60, 0.1);
-      border: 1px solid rgba(251, 146, 60, 0.2);
-    }
-
-    .status-none {
-      color: #52525b;
-      background: rgba(82, 82, 91, 0.1);
-      border: 1px solid rgba(82, 82, 91, 0.2);
-    }
-
-    .status-loading {
-      color: #52525b;
-      background: transparent;
-      border: 1px solid #1e1e1e;
-      animation: loadingPulse 1.2s ease-in-out infinite;
-    }
-
-    /* Footer note */
-    .claims-footnote {
-      font-size: 12px;
-      color: #52525b;
-      margin-top: 12px;
-      text-align: right;
-    }
-
-    .claims-footnote a {
-      color: var(--accent);
-      text-decoration: none;
-      opacity: 0.7;
-    }
-    .claims-footnote a:hover { opacity: 1; }
-
-    /* API error banner */
-    .api-error-banner {
-      display: none;
-      background: rgba(251, 146, 60, 0.08);
-      border: 1px solid rgba(251, 146, 60, 0.2);
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 12px;
-      color: #fb923c;
-      margin-bottom: 24px;
-      font-family: 'JetBrains Mono', monospace;
-    }
-
     @keyframes loadingPulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.3; }
     }
 
-    /* Mobile scroll hint */
-    @media (max-width: 768px) {
-      .table-scroll-hint {
-        font-size: 11px;
-        color: #52525b;
-        margin-bottom: 6px;
-        text-align: right;
-        font-family: 'JetBrains Mono', monospace;
-      }
-    }
+    .claims-table-wrapper { overflow-x: auto; margin-bottom: 48px; }
+    .claims-section-title { font-size: 13px; font-weight: 600; color: #52525b; text-transform: uppercase; letter-spacing: 0.08em; margin: 0 0 12px; }
+    .claims-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .claims-table th { background: #0d0d0d; color: #52525b; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.07em; padding: 10px 16px; text-align: left; border-bottom: 1px solid #1f1f23; white-space: nowrap; }
+    .claims-table td { padding: 12px 16px; color: #fafafa; border-bottom: 1px solid #111; vertical-align: middle; }
+    .claims-table tr:last-child td { border-bottom: none; }
+    .claims-table tr:hover td { background: rgba(255,255,255,0.02); }
+    .claims-table td.mono { font-family: 'Geist Mono', monospace; font-size: 12px; }
+    .claims-table td.muted { color: #52525b; }
 
-    @media (min-width: 769px) {
-      .table-scroll-hint { display: none; }
-    }
+    .status-badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 8px; border-radius: 4px; white-space: nowrap; }
+    .status-matches { background: rgba(34,197,94,0.1); color: #22c55e; border: 1px solid rgba(34,197,94,0.2); }
+    .status-faster { background: rgba(0,229,255,0.1); color: #00e5ff; border: 1px solid rgba(0,229,255,0.2); }
+    .status-slower { background: rgba(234,179,8,0.1); color: #eab308; border: 1px solid rgba(234,179,8,0.2); }
+    .status-none { background: rgba(255,255,255,0.04); color: #52525b; border: 1px solid #1f1f23; }
+    .status-loading { background: transparent; color: #52525b; border: 1px solid #1f1f23; animation: loadingPulse 1.2s ease-in-out infinite; }
+
+    .provider-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+    .source-link { color: #52525b; font-size: 11px; text-decoration: none; }
+    .source-link:hover { color: #a1a1aa; }
+    .no-claim { color: #52525b; font-style: italic; }
+
+    .api-error-banner { display: none; background: rgba(234,179,8,0.08); border: 1px solid rgba(234,179,8,0.2); border-radius: 8px; padding: 10px 16px; font-size: 12px; color: #eab308; margin-bottom: 24px; }
+
+    .measured-loading { font-family: 'Geist Mono', monospace; font-size: 12px; color: #52525b; animation: loadingPulse 1.2s ease-in-out infinite; }
+    .measured-value { font-family: 'Geist Mono', monospace; font-size: 13px; font-weight: 600; color: #fafafa; }
+    .measured-cached { font-family: 'Geist Mono', monospace; font-size: 12px; color: #52525b; }
+    .cached-label { font-size: 10px; color: #3f3f46; margin-left: 4px; }
+    .claim-value { font-family: 'Geist Mono', monospace; font-size: 12px; }
+    .claim-none { font-size: 12px; color: #52525b; font-style: italic; }
+    .source-none { font-size: 12px; color: #3f3f46; }
   </style>
 </head>
 <body>
@@ -360,16 +75,14 @@
     <ul class="nav-links" id="navLinks">
       <li><a href="/leaderboard.html">Leaderboard</a></li>
       <li><a href="/submit">Submit</a></li>
-      <li><a href="/quiz.html">Stack Builder</a></li>
-      <li><a href="/claims.html" class="nav-active">Claims</a></li>
-      <li><a href="/benchmark.html">Request Benchmark</a></li>
+      <li><a href="/quiz">Stack Builder</a></li>
+      <li><a href="/claims" class="nav-active">Claims</a></li>
+      <li><a href="/benchmark">Request Benchmark</a></li>
       <li>
-        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener" class="nav-github">
+        <a href="https://github.com/LatencyGrid/modelping" target="_blank" rel="noopener" class="nav-github">
           GitHub
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;margin-left:3px;">
-            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-            <polyline points="15 3 21 3 21 9"/>
-            <line x1="10" y1="14" x2="21" y2="3"/>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17L17 7M17 7H7M17 7v10"/>
           </svg>
         </a>
       </li>
@@ -378,121 +91,108 @@
 </nav>
 
 <!-- ===== PAGE ===== -->
-<main class="claims-page">
+<main>
+  <div style="padding: 100px 0 60px;">
+    <div class="container">
+      <h1 style="font-size: clamp(28px, 5vw, 42px); font-weight: 800; color: #fafafa; margin: 0 0 12px; letter-spacing: -0.02em;">Provider Claims vs. Reality</h1>
+      <p style="font-size: 16px; color: #a1a1aa; margin: 0; line-height: 1.6;">We ran the same benchmark on every provider. Here's how their published numbers compare to what we measured.</p>
+    </div>
+  </div>
 
-  <div class="page-badge">TRANSPARENCY REPORT</div>
-  <h1 class="page-title">Provider Claims vs. Reality</h1>
-  <p class="page-sub">We ran the same benchmark on every provider. Here's how their published numbers compare to what we measured.</p>
+  <div class="container">
 
-  <div class="methodology-box">
-    <div class="methodology-label">Methodology</div>
-    <p class="methodology-text">
-      TTFT measured via streaming from Ottawa, Canada and US East.
-      5 runs per model. Test prompt: <em>"Explain the concept of neural networks in one paragraph."</em><br>
-      STT: 5-second WAV test audio. TTS: 92-character sentence.<br>
-      All measurements made April 2026. Results vary by region and load.
+    <!-- Methodology -->
+    <div style="background:#0d0d0d; border:1px solid #1f1f23; border-radius:8px; padding:16px 20px; margin-bottom:40px; font-size:12px; color:#52525b; line-height:1.6;">
+      <strong style="color:#a1a1aa;">Methodology:</strong> TTFT measured via streaming from Ottawa, Canada and US East. 5 runs per model. Test prompt: "Explain the concept of neural networks in one paragraph." STT: 5-second WAV test audio. TTS: 92-character sentence. Measurements from April 2026. Results vary by region and load.
+      <span id="claimsLastUpdated" style="margin-left:8px;"></span>
+    </div>
+
+    <!-- API error banner -->
+    <div class="api-error-banner" id="apiBanner">
+      ⚠ Live API unavailable — showing cached measurements from April 2026.
+    </div>
+
+    <!-- ═══════════════════════════════ LLM TABLE ═══════════════════════════════ -->
+    <p class="claims-section-title">LLM Inference — TTFT P50</p>
+    <div class="claims-table-wrapper">
+      <table class="claims-table" id="llmTable">
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Model</th>
+            <th>Their Claim</th>
+            <th>Our TTFT P50</th>
+            <th>Source</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="llmBody">
+          <!-- rows injected by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════════════════════════ STT TABLE ═══════════════════════════════ -->
+    <p class="claims-section-title">Speech-to-Text — End-to-End Latency P50</p>
+    <div class="claims-table-wrapper">
+      <table class="claims-table" id="sttTable">
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Model</th>
+            <th>Their Claim</th>
+            <th>Our Latency P50</th>
+            <th>Source</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="sttBody">
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ═══════════════════════════════ TTS TABLE ═══════════════════════════════ -->
+    <p class="claims-section-title">Text-to-Speech — TTFB P50</p>
+    <div class="claims-table-wrapper">
+      <table class="claims-table" id="ttsTable">
+        <thead>
+          <tr>
+            <th>Provider</th>
+            <th>Model</th>
+            <th>Their Claim</th>
+            <th>Our TTFB P50</th>
+            <th>Source</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="ttsBody">
+        </tbody>
+      </table>
+    </div>
+
+    <p style="font-size:12px; color:#52525b; text-align:right; margin-top:-32px; margin-bottom:0;">
+      Found an error? <a href="mailto:hello@latencygrid.dev?subject=Claims correction" style="color:#52525b;">hello@latencygrid.dev</a>
     </p>
+
   </div>
-
-  <div class="last-updated" id="lastUpdated">
-    <span class="last-updated-dot" id="freshnessDot"></span>
-    <span id="lastUpdatedText">Loading data…</span>
-  </div>
-
-  <div class="api-error-banner" id="apiBanner">
-    ⚠ Live API unavailable — showing cached measurements from April 2026.
-  </div>
-
-  <!-- ═══════════════════════════════ LLM TABLE ═══════════════════════════════ -->
-  <div class="section-header">
-    <span class="section-title">LLM Inference</span>
-    <span class="section-tag">TTFT P50</span>
-  </div>
-
-  <div class="table-scroll-hint">← scroll to see all columns →</div>
-  <div class="table-wrap">
-    <table class="claims-table" id="llmTable">
-      <thead>
-        <tr>
-          <th>Provider</th>
-          <th>Model</th>
-          <th>Their Claim</th>
-          <th>Our TTFT P50</th>
-          <th>Source</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="llmBody">
-        <!-- rows injected by JS -->
-      </tbody>
-    </table>
-  </div>
-
-  <!-- ═══════════════════════════════ STT TABLE ═══════════════════════════════ -->
-  <div class="section-header">
-    <span class="section-title">Speech-to-Text</span>
-    <span class="section-tag">END-TO-END LATENCY P50</span>
-  </div>
-
-  <div class="table-scroll-hint">← scroll to see all columns →</div>
-  <div class="table-wrap">
-    <table class="claims-table" id="sttTable">
-      <thead>
-        <tr>
-          <th>Provider</th>
-          <th>Model</th>
-          <th>Their Claim</th>
-          <th>Our Latency P50</th>
-          <th>Source</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="sttBody">
-      </tbody>
-    </table>
-  </div>
-
-  <!-- ═══════════════════════════════ TTS TABLE ═══════════════════════════════ -->
-  <div class="section-header">
-    <span class="section-title">Text-to-Speech</span>
-    <span class="section-tag">TTFB P50</span>
-  </div>
-
-  <div class="table-scroll-hint">← scroll to see all columns →</div>
-  <div class="table-wrap">
-    <table class="claims-table" id="ttsTable">
-      <thead>
-        <tr>
-          <th>Provider</th>
-          <th>Model</th>
-          <th>Their Claim</th>
-          <th>Our TTFB P50</th>
-          <th>Source</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="ttsBody">
-      </tbody>
-    </table>
-  </div>
-
-  <p class="claims-footnote">
-    Found an error? <a href="mailto:hello@latencygrid.dev">Email hello@latencygrid.dev</a>
-  </p>
-
 </main>
 
-<!-- ===== MOBILE NAV TOGGLE ===== -->
+<!-- ===== FOOTER ===== -->
+<footer style="border-top:1px solid #1f1f23; padding:32px 0; margin-top:80px;">
+  <div class="container" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+    <div style="font-size:13px; color:#52525b;">LatencyGrid · Open source · MIT License · <a href="https://github.com/LatencyGrid/modelping" style="color:#52525b;">github.com/LatencyGrid/modelping</a></div>
+    <div style="font-size:12px; color:#3f3f46;">Data updated daily · hello@latencygrid.dev · <a href="mailto:hello@latencygrid.dev?subject=Claims correction" style="color:#52525b;">Found an error? Let us know</a></div>
+  </div>
+</footer>
+
+<!-- ===== NAV JS ===== -->
 <script>
-  (function() {
-    var btn = document.getElementById('mobileToggle');
-    var links = document.getElementById('navLinks');
-    if (btn && links) {
-      btn.addEventListener('click', function() {
-        links.classList.toggle('open');
-      });
-    }
-  })();
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 20);
+  });
+  document.getElementById('mobileToggle').addEventListener('click', () => {
+    document.getElementById('navLinks').classList.toggle('open');
+  });
 </script>
 
 <!-- ===== CLAIMS DATA + LIVE FETCH ===== -->
@@ -789,7 +489,6 @@ function renderTable(tbodyId, rows, liveData, loading) {
 
   tbody.innerHTML = rows.map(function(row) {
     var liveMs = null;
-    var isCached = false;
 
     if (!loading && liveData) {
       liveMs = liveData[row.apiKey] || null;
@@ -802,7 +501,6 @@ function renderTable(tbodyId, rows, liveData, loading) {
       displayMs = '<span class="measured-value">' + Math.round(liveMs) + 'ms</span>';
     } else {
       displayMs = '<span class="measured-cached">' + row.fallbackMs + 'ms<span class="cached-label">(cached)</span></span>';
-      isCached = true;
     }
 
     var measuredForStatus = liveMs !== null ? liveMs : row.fallbackMs;
@@ -816,11 +514,9 @@ function renderTable(tbodyId, rows, liveData, loading) {
       ? '<a href="' + row.sourceUrl + '" target="_blank" rel="noopener" class="source-link">' + row.sourceLabel + ' ↗</a>'
       : '<span class="source-none">—</span>';
 
-    var trClass = (row.claimMs === null) ? 'no-claim' : '';
-
-    return '<tr class="' + trClass + '">'
-      + '<td><span class="provider-name">' + row.provider + '</span></td>'
-      + '<td><span class="model-name">' + row.modelShort + '</span></td>'
+    return '<tr>'
+      + '<td>' + row.provider + '</td>'
+      + '<td class="mono">' + row.modelShort + '</td>'
       + '<td>' + claimCell + '</td>'
       + '<td>' + displayMs + '</td>'
       + '<td>' + sourceCell + '</td>'
@@ -853,29 +549,16 @@ function timeAgo(isoStr) {
 }
 
 function updateFreshnessUI(timestamp) {
-  var text = document.getElementById('lastUpdatedText');
-  var dot  = document.getElementById('freshnessDot');
-  if (!text) return;
-
-  var ageMs = Date.now() - new Date(timestamp).getTime();
-  var ageHrs = ageMs / 3600000;
-
-  text.textContent = 'Last updated: ' + timeAgo(timestamp);
-
-  if (dot) {
-    if (ageHrs < 6) {
-      dot.classList.add('fresh');
-    } else {
-      dot.classList.remove('fresh');
-    }
-  }
+  var el = document.getElementById('claimsLastUpdated');
+  if (!el) return;
+  el.textContent = 'Last updated: ' + timeAgo(timestamp);
 }
 
 function showApiError() {
   var banner = document.getElementById('apiBanner');
   if (banner) banner.style.display = 'block';
-  var text = document.getElementById('lastUpdatedText');
-  if (text) text.textContent = 'Live data unavailable — showing cached measurements';
+  var el = document.getElementById('claimsLastUpdated');
+  if (el) el.textContent = 'Live data unavailable — showing cached measurements';
 }
 
 (function loadLiveData() {
