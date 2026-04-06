@@ -476,9 +476,10 @@
 
       submissions.forEach(sub => {
         const regionLabel = REGION_LABELS[sub.region] || sub.region || '—';
-        const llmMs = getFastestLLM(sub.llm);
-        const sttMs = getFastestSTT(sub.stt);
-        const ttsMs = getFastestTTS(sub.tts);
+        // Use pre-computed summary fields from index, fall back to computing from arrays
+        const llmMs = sub.fastest_llm_ms ?? getFastestLLM(sub.llm);
+        const sttMs = sub.fastest_stt_ms ?? getFastestSTT(sub.stt);
+        const ttsMs = sub.fastest_tts_ms ?? getFastestTTS(sub.tts);
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
