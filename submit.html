@@ -363,9 +363,25 @@ Example:
           ></textarea>
         </div>
 
-        <div class="email-field">
-          <label for="email">Email (optional) — get notified when your region leaderboard goes live</label>
-          <input type="email" id="email" name="email" placeholder="you@example.com" />
+        <div class="form-row" style="margin-top:20px;padding-top:20px;border-top:1px solid #1a1a1a;">
+          <div class="form-group">
+            <label for="firstName">First Name <span style="color:#ef4444">*</span></label>
+            <input type="text" id="firstName" name="firstName" placeholder="Jane" required />
+          </div>
+          <div class="form-group">
+            <label for="company">Company <span style="color:#ef4444">*</span></label>
+            <input type="text" id="company" name="company" placeholder="Acme AI" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email <span style="color:#ef4444">*</span></label>
+          <input type="email" id="email" name="email" placeholder="you@company.com" required />
+        </div>
+
+        <div class="form-group">
+          <label for="useCase">What are you building? <span style="color:#52525b;font-weight:400;text-transform:none;letter-spacing:0">(optional)</span></label>
+          <input type="text" id="useCase" name="useCase" placeholder="e.g. real-time voice assistant, STT pipeline..." />
         </div>
 
         <button type="submit" class="submit-btn" id="submitBtn">
@@ -401,6 +417,9 @@ Example:
       const region = document.getElementById('region').value;
       const location = document.getElementById('location').value;
       const email = document.getElementById('email').value;
+      const firstName = document.getElementById('firstName').value.trim();
+      const company = document.getElementById('company').value.trim();
+      const useCase = document.getElementById('useCase').value.trim();
       const jsonData = document.getElementById('jsonData').value.trim();
 
       let parsedData;
@@ -420,8 +439,9 @@ Example:
         timestamp: new Date().toISOString(),
         modelping_version: 'web-form',
         llm: Array.isArray(parsedData) ? parsedData : [],
+        submitter: { name: firstName, company, email, use_case: useCase },
       };
-      if (email) payload.email = email;
+      payload.email = email; // also at top level for Worker compatibility
 
       try {
         const resp = await fetch('https://api.latencygrid.dev/submit', {
