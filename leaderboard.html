@@ -433,23 +433,32 @@
 
     function getFastestLLM(llm) {
       if (!Array.isArray(llm) || llm.length === 0) return null;
-      const valid = llm.filter(m => m.p50_ttft_ms != null);
+      // support both field name variants
+      const valid = llm.filter(m => m.ttft_p50 != null && m.error_rate < 1.0);
       if (!valid.length) return null;
-      return Math.min(...valid.map(m => m.p50_ttft_ms));
+      return Math.min(...valid.map(m => m.ttft_p50));
+    }
+
+    function getFastestLLMModel(llm) {
+      if (!Array.isArray(llm) || llm.length === 0) return null;
+      const valid = llm.filter(m => m.ttft_p50 != null && m.error_rate < 1.0);
+      if (!valid.length) return null;
+      const fastest = valid.reduce((a, b) => a.ttft_p50 < b.ttft_p50 ? a : b);
+      return fastest.model;
     }
 
     function getFastestSTT(stt) {
       if (!Array.isArray(stt) || stt.length === 0) return null;
-      const valid = stt.filter(m => m.p50_latency_ms != null);
+      const valid = stt.filter(m => (m.latency_p50 != null || m.p50_latency_ms != null));
       if (!valid.length) return null;
-      return Math.min(...valid.map(m => m.p50_latency_ms));
+      return Math.min(...valid.map(m => m.latency_p50 ?? m.p50_latency_ms));
     }
 
     function getFastestTTS(tts) {
       if (!Array.isArray(tts) || tts.length === 0) return null;
-      const valid = tts.filter(m => m.p50_ttfb_ms != null);
+      const valid = tts.filter(m => (m.ttfb_p50 != null || m.p50_ttfb_ms != null));
       if (!valid.length) return null;
-      return Math.min(...valid.map(m => m.p50_ttfb_ms));
+      return Math.min(...valid.map(m => m.ttfb_p50 ?? m.p50_ttfb_ms));
     }
 
     function renderTable(submissions) {
