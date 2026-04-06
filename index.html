@@ -46,7 +46,7 @@
       <!-- Live stats bar -->
       <div class="hero-stat-bar">
         <div class="hero-stat-item">
-          <span class="hero-stat-label">Fastest voice pipeline today</span>
+          <span class="hero-stat-label"><span class="live-dot"></span>Fastest voice pipeline today</span>
           <span class="hero-stat-value" id="heroFastestPipeline">317ms</span>
           <span class="hero-stat-meta">groq/whisper → groq/llama-3.3-70b → cartesia/sonic-2 · Ottawa, Canada</span>
         </div>
@@ -71,7 +71,7 @@
   ════════════════════════════════════════════ -->
   <section class="section leaderboard-section" id="leaderboard">
     <div class="container leaderboard-container">
-      <h2 class="section-title">Benchmark Results</h2>
+      <div class="section-title-wrap"><h2 class="section-title">Benchmark Results</h2></div>
       <p class="section-sub">
         Real measurements. No synthetic tests. Run with modelping.
       </p>
@@ -362,7 +362,7 @@
   ════════════════════════════════════════════ -->
   <section class="section matrix-section" id="pipeline-matrix">
     <div class="container">
-      <h2 class="section-title">Pipeline Latency Matrix</h2>
+      <div class="section-title-wrap"><h2 class="section-title">Pipeline Latency Matrix</h2></div>
       <p class="section-sub">Total STT + LLM + TTS latency. Select an LLM to explore combinations.</p>
 
       <!-- LLM selector -->
@@ -417,39 +417,74 @@
   ════════════════════════════════════════════ -->
   <section class="section roadmap-section" id="roadmap">
     <div class="container">
-      <h2 class="section-title">Roadmap</h2>
+      <div class="section-title-wrap"><h2 class="section-title">Roadmap</h2></div>
       <p class="section-sub">What's built and what's coming.</p>
       <div class="roadmap-list">
         <div class="roadmap-item">
-          <span class="roadmap-dot-done"></span>
+          <div class="roadmap-status roadmap-status-done">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l2.5 2.5L10 3.5" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
           <span>LLM benchmarking — TTFT, throughput, cost</span>
         </div>
         <div class="roadmap-item">
-          <span class="roadmap-dot-done"></span>
+          <div class="roadmap-status roadmap-status-done">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l2.5 2.5L10 3.5" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
           <span>STT benchmarking — transcription latency</span>
         </div>
         <div class="roadmap-item">
-          <span class="roadmap-dot-done"></span>
+          <div class="roadmap-status roadmap-status-done">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l2.5 2.5L10 3.5" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
           <span>TTS benchmarking — time to first audio byte</span>
         </div>
         <div class="roadmap-item">
-          <span class="roadmap-dot-done"></span>
+          <div class="roadmap-status roadmap-status-done">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l2.5 2.5L10 3.5" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
           <span>Full STT→LLM→TTS pipeline benchmark</span>
         </div>
         <div class="roadmap-item">
-          <span class="roadmap-dot-done"></span>
+          <div class="roadmap-status roadmap-status-done">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l2.5 2.5L10 3.5" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
           <span>Community leaderboard — global rankings, regional data</span>
         </div>
         <div class="roadmap-item roadmap-item-pending">
-          <span class="roadmap-dot-pending"></span>
+          <div class="roadmap-status roadmap-status-pending">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="6" r="4.5" stroke="#444" stroke-width="1.5"/>
+              <path d="M4 6h4" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
           <span>Network routing latency — how much does geography cost you?</span>
         </div>
         <div class="roadmap-item roadmap-item-pending">
-          <span class="roadmap-dot-pending"></span>
+          <div class="roadmap-status roadmap-status-pending">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="6" r="4.5" stroke="#444" stroke-width="1.5"/>
+              <path d="M4 6h4" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
           <span>Concurrency benchmarks — latency under load</span>
         </div>
         <div class="roadmap-item roadmap-item-pending">
-          <span class="roadmap-dot-pending"></span>
+          <div class="roadmap-status roadmap-status-pending">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+              <circle cx="6" cy="6" r="4.5" stroke="#444" stroke-width="1.5"/>
+              <path d="M4 6h4" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
           <span>Hardware benchmarks — GPU architecture vs real-world inference</span>
         </div>
       </div>
@@ -461,7 +496,7 @@
   ════════════════════════════════════════════ -->
   <section class="section providers-section" id="providers">
     <div class="container">
-      <h2 class="section-title">Supported Providers</h2>
+      <div class="section-title-wrap"><h2 class="section-title">Supported Providers</h2></div>
       <p class="section-sub">Missing a provider? Request it.</p>
 
       <div class="providers-rows">
@@ -538,6 +573,13 @@
       </div>
     </div>
   </footer>
+
+  <script>
+    // ── Nav scroll border ──
+    window.addEventListener('scroll', function() {
+      document.querySelector('.nav').classList.toggle('scrolled', window.scrollY > 20);
+    });
+  </script>
 
   <script>
     // ── Leaderboard tab switching ──
