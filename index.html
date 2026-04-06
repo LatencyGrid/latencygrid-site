@@ -1014,6 +1014,40 @@
       renderLLMTable(llm);
       renderSTTTable(stt);
       renderTTSTable(tts);
+
+      // Pipeline tab — update from live data if available
+      var pipeline = sub.pipeline || [];
+      if (pipeline.length) {
+        var best = pipeline.reduce(function(a, b) {
+          return a.total_pipeline_ms < b.total_pipeline_ms ? a : b;
+        });
+        // Update route label
+        var routeEl = document.querySelector('.pipeline-route');
+        if (routeEl) {
+          routeEl.innerHTML =
+            '<span>' + (best.stt_model || best.stt_provider) + '</span>' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>' +
+            '<span>' + (best.llm_model || best.llm_provider) + '</span>' +
+            '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>' +
+            '<span>' + (best.tts_model || best.tts_provider) + '</span>';
+        }
+        // Update bar proportions
+        var total = best.stt_latency_ms + best.llm_ttft_ms + best.tts_ttfb_ms;
+        var sttPct = (best.stt_latency_ms / total * 100).toFixed(1);
+        var llmPct = (best.llm_ttft_ms / total * 100).toFixed(1);
+        var ttsPct = (best.tts_ttfb_ms / total * 100).toFixed(1);
+        var segStt = document.querySelector('.bar-seg.stt');
+        var segLlm = document.querySelector('.bar-seg.llm');
+        var segTts = document.querySelector('.bar-seg.tts');
+        if (segStt) { segStt.style.width = sttPct + '%'; segStt.textContent = 'STT ' + best.stt_latency_ms + 'ms'; }
+        if (segLlm) { segLlm.style.width = llmPct + '%'; segLlm.textContent = 'LLM ' + best.llm_ttft_ms + 'ms'; }
+        if (segTts) { segTts.style.width = ttsPct + '%'; segTts.textContent = 'TTS ' + best.tts_ttfb_ms + 'ms'; }
+        // Update total
+        var totalEl = document.querySelector('.pipeline-total strong');
+        if (totalEl) totalEl.textContent = best.total_pipeline_ms + 'ms';
+        // Update hero fastest pipeline
+        document.getElementById('heroFastestPipeline').textContent = best.total_pipeline_ms + 'ms';
+      }
     }
 
     function findBestSubmission(submissions) {
