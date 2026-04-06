@@ -4,726 +4,762 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>LatencyGrid — Voice AI Pipeline Latency Benchmarks</title>
-  <meta name="description" content="Real latency benchmarks across STT, LLM, and TTS providers. Updated daily. Full voice pipeline data." />
-
-  <!-- OG / Twitter Card -->
-  <meta property="og:title" content="LatencyGrid — Voice AI Pipeline Latency Benchmarks" />
-  <meta property="og:description" content="Real latency benchmarks across STT, LLM, and TTS providers. Updated daily." />
-  <meta property="og:url" content="https://latencygrid.dev" />
-  <meta property="og:type" content="website" />
-  <meta property="og:image" content="https://latencygrid.dev/og-image.png" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="LatencyGrid — Voice AI Pipeline Latency Benchmarks" />
-  <meta name="twitter:description" content="Real latency benchmarks across STT, LLM, and TTS providers. Updated daily." />
-  <meta name="twitter:image" content="https://latencygrid.dev/og-image.png" />
-
+  <meta name="description" content="Real latency benchmarks for Voice AI pipelines. STT, LLM, TTS latency measurements across 20+ providers. Updated daily." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
-
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-  <!-- ═══════════════════════════════════════════
-       HERO
-  ════════════════════════════════════════════ -->
-  <section class="hero">
-    <nav class="nav">
-      <a href="/" class="nav-logo" style="text-decoration:none; color: inherit;">LatencyGrid</a>
-      <div class="nav-links">
-        <a href="/leaderboard">Leaderboard</a>
-        <a href="/quiz">Stack Builder</a>
-        <a href="/benchmark">Benchmark</a>
-        <a href="https://github.com/LatencyGrid/modelping" target="_blank" rel="noopener">GitHub</a>
-      </div>
-    </nav>
-
-    <div class="hero-content">
-      <h1 class="hero-title-plain">Voice AI Pipeline Latency</h1>
-      <p class="hero-updated">Updated daily across 20+ providers</p>
-
-      <!-- Live stats bar -->
-      <div class="hero-stat-bar">
-        <div class="hero-stat-item">
-          <span class="hero-stat-label"><span class="live-dot"></span>Fastest voice pipeline today</span>
-          <span class="hero-stat-value" id="heroFastestPipeline">317ms</span>
-          <span class="hero-stat-meta">groq/whisper → groq/llama-3.3-70b → cartesia/sonic-2 · Ottawa, Canada</span>
-        </div>
-        <div class="hero-stat-divider"></div>
-        <div class="hero-stat-item">
-          <span class="hero-stat-label">Fastest LLM TTFT</span>
-          <span class="hero-stat-value" id="heroFastestLLM">109ms</span>
-          <span class="hero-stat-meta">kimi-k2 via groq</span>
-        </div>
-        <div class="hero-stat-divider"></div>
-        <div class="hero-stat-item">
-          <span class="hero-stat-label">Fastest TTS response</span>
-          <span class="hero-stat-value" id="heroFastestTTS">156ms</span>
-          <span class="hero-stat-meta">deepgram aura-luna</span>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═══════════════════════════════════════════
-       BENCHMARK LEADERBOARD
-  ════════════════════════════════════════════ -->
-  <section class="section leaderboard-section" id="leaderboard">
-    <div class="container leaderboard-container">
-      <div class="section-title-wrap"><h2 class="section-title">Benchmark Results</h2></div>
-      <p class="section-sub">
-        Real measurements. No synthetic tests. Run with modelping.
-      </p>
-
-      <!-- Metadata badges -->
-      <div class="lb-meta">
-        <span class="lb-meta-badge">Ottawa, Canada</span>
-        <span class="lb-meta-badge">April 5, 2026</span>
-        <span class="lb-meta-badge">5 runs per model</span>
-        <span class="lb-meta-badge">modelping v0.1.0</span>
-      </div>
-
-      <!-- Tabs -->
-      <div class="lb-tabs" role="tablist">
-        <button class="lb-tab active" data-tab="pipeline" role="tab" aria-selected="true">Pipeline</button>
-        <button class="lb-tab" data-tab="llm" role="tab" aria-selected="false">LLM</button>
-        <button class="lb-tab" data-tab="stt" role="tab" aria-selected="false">STT</button>
-        <button class="lb-tab" data-tab="tts" role="tab" aria-selected="false">TTS</button>
-      </div>
-
-      <!-- ── Pipeline Tab ── -->
-      <div class="lb-panel" id="tab-pipeline">
-        <div class="lb-pipeline">
-          <div class="pipeline-route">
-            groq/whisper-large-v3-turbo → groq/llama-3.3-70b → cartesia/sonic-2
-          </div>
-          <div class="pipeline-bar-wrap">
-            <div class="pipeline-bar">
-              <div class="pipeline-seg seg-stt" style="width:51.8%">
-                <span class="seg-label">STT<br>336ms</span>
-              </div>
-              <div class="pipeline-seg seg-llm" style="width:21.6%">
-                <span class="seg-label">LLM<br>140ms</span>
-              </div>
-              <div class="pipeline-seg seg-tts" style="width:26.6%">
-                <span class="seg-label">TTS<br>173ms</span>
-              </div>
-            </div>
-            <div class="pipeline-bar-note">Segments show per-stage latency (STT+LLM+TTS = 649ms measured). Wall-clock total includes streaming overlap &amp; network.</div>
-          </div>
-          <div class="pipeline-total">Total end-to-end: <strong>1644ms</strong></div>
-          <div class="pipeline-legend">
-            <span class="legend-item"><span class="legend-dot" style="background:#3b82f6"></span>STT</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#8b5cf6"></span>LLM</span>
-            <span class="legend-item"><span class="legend-dot" style="background:#00ff88"></span>TTS</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── LLM Tab ── -->
-      <div class="lb-panel" id="tab-llm" style="display:none">
-        <div class="lb-table-wrap">
-          <table class="lb-table">
-            <thead>
-              <tr>
-                <th>Model</th>
-                <th>Provider</th>
-                <th class="lb-th-num">TTFT P50</th>
-                <th class="lb-th-num">TTFT P95</th>
-                <th class="lb-th-num">Tok/s</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="lb-row-fastest">
-                <td class="lb-model">kimi-k2</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#f55036"></span>groq</td>
-                <td class="lb-val lb-green">109ms</td>
-                <td class="lb-val">157ms</td>
-                <td class="lb-val">175.3</td>
-              </tr>
-              <tr>
-                <td class="lb-model">llama-3.1-8b-instant</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#f55036"></span>groq</td>
-                <td class="lb-val lb-green">114ms</td>
-                <td class="lb-val">130ms</td>
-                <td class="lb-val">387.0</td>
-              </tr>
-              <tr>
-                <td class="lb-model">llama-4-scout-17b</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#f55036"></span>groq</td>
-                <td class="lb-val lb-green">166ms</td>
-                <td class="lb-val">275ms</td>
-                <td class="lb-val">234.7</td>
-              </tr>
-              <tr>
-                <td class="lb-model">llama-3.3-70b-versatile</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#f55036"></span>groq</td>
-                <td class="lb-val">327ms</td>
-                <td class="lb-val">378ms</td>
-                <td class="lb-val">181.6</td>
-              </tr>
-              <tr>
-                <td class="lb-model">gpt-4o</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#74aa9c"></span>openai</td>
-                <td class="lb-val">380ms</td>
-                <td class="lb-val">451ms</td>
-                <td class="lb-val">81.6</td>
-              </tr>
-              <tr>
-                <td class="lb-model">claude-haiku-4-5</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#d4a5a5"></span>anthropic</td>
-                <td class="lb-val">463ms</td>
-                <td class="lb-val">1700ms</td>
-                <td class="lb-val">68.8</td>
-              </tr>
-              <tr>
-                <td class="lb-model">gpt-4o-mini</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#74aa9c"></span>openai</td>
-                <td class="lb-val">508ms</td>
-                <td class="lb-val">549ms</td>
-                <td class="lb-val">44.0</td>
-              </tr>
-              <tr>
-                <td class="lb-model">o3-mini</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#74aa9c"></span>openai</td>
-                <td class="lb-val lb-red">956ms</td>
-                <td class="lb-val">1508ms</td>
-                <td class="lb-val">70.1</td>
-              </tr>
-              <tr>
-                <td class="lb-model">claude-sonnet-4-5</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#d4a5a5"></span>anthropic</td>
-                <td class="lb-val lb-red">1361ms</td>
-                <td class="lb-val">1792ms</td>
-                <td class="lb-val">31.4</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- ── STT Tab ── -->
-      <div class="lb-panel" id="tab-stt" style="display:none">
-        <div class="lb-table-wrap">
-          <table class="lb-table">
-            <thead>
-              <tr>
-                <th>Model</th>
-                <th>Provider</th>
-                <th class="lb-th-num">Latency P50</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="lb-row-fastest">
-                <td class="lb-model">whisper-large-v3</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#f55036"></span>groq</td>
-                <td class="lb-val lb-green">360ms</td>
-              </tr>
-              <tr>
-                <td class="lb-model">whisper-large-v3-turbo</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#f55036"></span>groq</td>
-                <td class="lb-val lb-green">527ms</td>
-              </tr>
-              <tr>
-                <td class="lb-model">nova-3</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#13ef95"></span>deepgram</td>
-                <td class="lb-val lb-green">583ms</td>
-              </tr>
-              <tr>
-                <td class="lb-model">nova-2</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#13ef95"></span>deepgram</td>
-                <td class="lb-val">622ms</td>
-              </tr>
-              <tr>
-                <td class="lb-model">gpt-4o-transcribe</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#74aa9c"></span>openai</td>
-                <td class="lb-val">799ms</td>
-              </tr>
-              <tr>
-                <td class="lb-model">universal-2</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#5965e0"></span>assemblyai</td>
-                <td class="lb-val">1725ms</td>
-              </tr>
-              <tr>
-                <td class="lb-model">universal-3-pro</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#5965e0"></span>assemblyai</td>
-                <td class="lb-val lb-red">2855ms</td>
-              </tr>
-              <tr>
-                <td class="lb-model">default</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#e04f96"></span>gladia</td>
-                <td class="lb-val lb-red">3452ms</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- ── TTS Tab ── -->
-      <div class="lb-panel" id="tab-tts" style="display:none">
-        <div class="lb-table-wrap">
-          <table class="lb-table">
-            <thead>
-              <tr>
-                <th>Model</th>
-                <th>Provider</th>
-                <th class="lb-th-num">TTFB P50</th>
-                <th class="lb-th-num">Realtime Factor</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr class="lb-row-fastest">
-                <td class="lb-model">aura-luna</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#13ef95"></span>deepgram</td>
-                <td class="lb-val lb-green">156ms</td>
-                <td class="lb-val lb-rtf-yellow">2.7×</td>
-              </tr>
-              <tr>
-                <td class="lb-model">sonic-2</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#00ff88"></span>cartesia</td>
-                <td class="lb-val lb-green">200ms</td>
-                <td class="lb-val lb-rtf-yellow">3.9×</td>
-              </tr>
-              <tr>
-                <td class="lb-model">sonic-english</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#00ff88"></span>cartesia</td>
-                <td class="lb-val lb-green">210ms</td>
-                <td class="lb-val lb-rtf-red">1.9×</td>
-              </tr>
-              <tr>
-                <td class="lb-model">aura-asteria</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#13ef95"></span>deepgram</td>
-                <td class="lb-val">293ms</td>
-                <td class="lb-val lb-rtf-yellow">2.1×</td>
-              </tr>
-              <tr>
-                <td class="lb-model">aurora</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#ff7043"></span>lmnt</td>
-                <td class="lb-val">298ms</td>
-                <td class="lb-val lb-rtf-yellow">2.8×</td>
-              </tr>
-              <tr>
-                <td class="lb-model">blizzard</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#ff7043"></span>lmnt</td>
-                <td class="lb-val">310ms</td>
-                <td class="lb-val lb-rtf-yellow">3.5×</td>
-              </tr>
-              <tr>
-                <td class="lb-model">flash-v2.5</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#f5c842"></span>elevenlabs</td>
-                <td class="lb-val">374ms</td>
-                <td class="lb-val lb-rtf-green">11.3×</td>
-              </tr>
-              <tr>
-                <td class="lb-model">tts-1</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#74aa9c"></span>openai</td>
-                <td class="lb-val">1050ms</td>
-                <td class="lb-val lb-rtf-yellow">3.6×</td>
-              </tr>
-              <tr>
-                <td class="lb-model">multilingual-v2</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#f5c842"></span>elevenlabs</td>
-                <td class="lb-val">1277ms</td>
-                <td class="lb-val lb-rtf-yellow">4.0×</td>
-              </tr>
-              <tr>
-                <td class="lb-model">tts-1-hd</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#74aa9c"></span>openai</td>
-                <td class="lb-val lb-red">2010ms</td>
-                <td class="lb-val lb-rtf-yellow">2.3×</td>
-              </tr>
-              <tr>
-                <td class="lb-model">default</td>
-                <td class="lb-provider"><span class="lb-dot" style="background:#4fc3f7"></span>fish-audio</td>
-                <td class="lb-val lb-red">2511ms</td>
-                <td class="lb-val lb-rtf-yellow">2.9×</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- CTA -->
-      <div class="lb-cta">
-        <div class="lb-cta-text">
-          <strong>Add your results to the leaderboard →</strong>
-          <span>Run modelping and submit your data. Takes 2 minutes.</span>
-        </div>
-        <a href="/submit" class="lb-cta-link">
-          Submit your benchmarks →
+<!-- ===== NAV ===== -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">LatencyGrid</a>
+    <button class="nav-mobile-toggle" id="mobileToggle" aria-label="Toggle navigation">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <line x1="3" y1="12" x2="21" y2="12"/>
+        <line x1="3" y1="18" x2="21" y2="18"/>
+      </svg>
+    </button>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="/leaderboard.html">Leaderboard</a></li>
+      <li><a href="#matrix">Stack Builder</a></li>
+      <li><a href="/benchmark.html">Benchmark</a></li>
+      <li>
+        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener" class="nav-github">
+          GitHub
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 17L17 7M17 7H7M17 7v10"/>
+          </svg>
         </a>
+      </li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-tag">Voice AI Infrastructure</div>
+    <h1 class="hero-title">Voice AI Pipeline Latency</h1>
+    <p class="hero-sub">
+      Updated daily <span>·</span> 20+ providers <span>·</span> Real measurements
+    </p>
+
+    <div class="hero-stats">
+      <!-- Fastest pipeline -->
+      <div class="stat-card">
+        <div class="stat-number cyan">317ms</div>
+        <div class="stat-label-row">
+          <div class="live-dot"></div>
+          <div class="stat-label">Fastest Pipeline</div>
+        </div>
+        <div class="stat-meta">groq → groq → cartesia</div>
+      </div>
+
+      <!-- Fastest LLM -->
+      <div class="stat-card">
+        <div class="stat-number white">109ms</div>
+        <div class="stat-label-row">
+          <div class="stat-label">Fastest LLM TTFT</div>
+        </div>
+        <div class="stat-meta">kimi-k2 via groq</div>
+      </div>
+
+      <!-- Fastest TTS -->
+      <div class="stat-card">
+        <div class="stat-number white">156ms</div>
+        <div class="stat-label-row">
+          <div class="stat-label">Fastest TTS TTFB</div>
+        </div>
+        <div class="stat-meta">deepgram aura-luna</div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ═══════════════════════════════════════════
-       INTERACTIVE PIPELINE MATRIX
-  ════════════════════════════════════════════ -->
-  <section class="section matrix-section" id="pipeline-matrix">
-    <div class="container">
-      <div class="section-title-wrap"><h2 class="section-title">Pipeline Latency Matrix</h2></div>
-      <p class="section-sub">Total STT + LLM + TTS latency. Select an LLM to explore combinations.</p>
+<div class="section-divider"></div>
 
-      <!-- LLM selector -->
-      <div class="matrix-llm-selector">
-        <label class="matrix-llm-label" for="llmSelect">LLM:</label>
-        <select id="llmSelect" class="matrix-select">
-          <option value="groq-llama-3.3-70b" data-ttft="140">Groq Llama 3.3 70B — 140ms TTFT</option>
-          <option value="groq-llama-3.1-8b" data-ttft="114">Groq Llama 3.1 8B — 114ms TTFT</option>
-          <option value="groq-kimi-k2" data-ttft="109">Groq kimi-k2 — 109ms TTFT</option>
-          <option value="gpt-4o-mini" data-ttft="508">GPT-4o-mini — 508ms TTFT</option>
-          <option value="gpt-4o" data-ttft="380">GPT-4o — 380ms TTFT</option>
-          <option value="claude-haiku-4-5" data-ttft="463">Claude Haiku 4.5 — 463ms TTFT</option>
-          <option value="gemini-2.5-flash" data-ttft="936">Gemini 2.5 Flash — 936ms TTFT</option>
-        </select>
+<!-- ===== BENCHMARK RESULTS ===== -->
+<section id="benchmarks">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Benchmark Results</h2>
+      <p class="section-sub">Real measurements. No synthetic tests. Run with modelping.</p>
+    </div>
+
+    <div class="meta-strip">
+      <span>Ottawa, Canada</span>
+      <span class="meta-sep">·</span>
+      <span>April 5, 2026</span>
+      <span class="meta-sep">·</span>
+      <span>5 runs</span>
+      <span class="meta-sep">·</span>
+      <span>modelping v0.1.0</span>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="pipeline">Pipeline</button>
+      <button class="tab-btn" data-tab="llm">LLM</button>
+      <button class="tab-btn" data-tab="stt">STT</button>
+      <button class="tab-btn" data-tab="tts">TTS</button>
+    </div>
+
+    <!-- Pipeline tab -->
+    <div class="tab-panel active" id="tab-pipeline">
+      <div class="pipeline-route">
+        <span>groq/whisper-large-v3-turbo</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <span>groq/llama-3.3-70b</span>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        <span>cartesia/sonic-2</span>
       </div>
 
-      <div class="matrix-table-wrap">
-        <table class="matrix-table" id="matrixTable">
+      <div class="pipeline-bar-wrapper">
+        <div class="bar-seg stt" style="width:51.8%">STT 336ms</div>
+        <div class="bar-seg llm" style="width:21.6%">LLM 140ms</div>
+        <div class="bar-seg tts" style="width:26.6%">TTS 173ms</div>
+      </div>
+
+      <div class="pipeline-total">Total: <strong>1644ms</strong> wall-clock</div>
+
+      <div class="pipeline-legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#3b82f6"></div>
+          STT — Speech-to-Text
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#7c3aed"></div>
+          LLM — Language Model
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:#00e5ff"></div>
+          TTS — Text-to-Speech
+        </div>
+      </div>
+    </div>
+
+    <!-- LLM tab -->
+    <div class="tab-panel" id="tab-llm">
+      <div class="table-wrapper">
+        <table>
           <thead>
             <tr>
-              <th class="matrix-corner">STT \ TTS</th>
-              <th>Cartesia Sonic-2</th>
-              <th>Deepgram Luna</th>
-              <th>ElevenLabs Flash</th>
-              <th>LMNT Aurora</th>
+              <th>Model</th>
+              <th>Provider</th>
+              <th>TTFT P50</th>
+              <th>TTFT P95</th>
+              <th>Tok/s</th>
             </tr>
           </thead>
-          <tbody id="matrixBody">
-            <!-- Populated by JS -->
+          <tbody>
+            <tr>
+              <td class="model-name">kimi-k2</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#f55036"></div>groq</div></td>
+              <td class="latency-green">109ms</td>
+              <td class="mono">157ms</td>
+              <td class="mono">175.3</td>
+            </tr>
+            <tr>
+              <td class="model-name">llama-3.1-8b-instant</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#f55036"></div>groq</div></td>
+              <td class="latency-green">114ms</td>
+              <td class="mono">130ms</td>
+              <td class="mono">387.0</td>
+            </tr>
+            <tr>
+              <td class="model-name">llama-4-scout-17b</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#f55036"></div>groq</div></td>
+              <td class="latency-green">166ms</td>
+              <td class="mono">275ms</td>
+              <td class="mono">234.7</td>
+            </tr>
+            <tr>
+              <td class="model-name">llama-3.3-70b-versatile</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#f55036"></div>groq</div></td>
+              <td class="latency-white">327ms</td>
+              <td class="mono">378ms</td>
+              <td class="mono">181.6</td>
+            </tr>
+            <tr>
+              <td class="model-name">gpt-4o</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#74aa9c"></div>openai</div></td>
+              <td class="latency-white">380ms</td>
+              <td class="mono">451ms</td>
+              <td class="mono">81.6</td>
+            </tr>
+            <tr>
+              <td class="model-name">claude-haiku-4-5</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#d4a5a5"></div>anthropic</div></td>
+              <td class="latency-white">463ms</td>
+              <td class="mono">1700ms</td>
+              <td class="mono">68.8</td>
+            </tr>
+            <tr>
+              <td class="model-name">gpt-4o-mini</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#74aa9c"></div>openai</div></td>
+              <td class="latency-white">508ms</td>
+              <td class="mono">549ms</td>
+              <td class="mono">44.0</td>
+            </tr>
+            <tr>
+              <td class="model-name">gemini-2.5-flash</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#4285f4"></div>google</div></td>
+              <td class="latency-white">936ms</td>
+              <td class="mono">1100ms</td>
+              <td class="mono">45.2</td>
+            </tr>
+            <tr>
+              <td class="model-name">o3-mini</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#74aa9c"></div>openai</div></td>
+              <td class="latency-red">956ms</td>
+              <td class="mono">1508ms</td>
+              <td class="mono">70.1</td>
+            </tr>
+            <tr>
+              <td class="model-name">claude-sonnet-4-5</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#d4a5a5"></div>anthropic</div></td>
+              <td class="latency-red">1361ms</td>
+              <td class="mono">1792ms</td>
+              <td class="mono">31.4</td>
+            </tr>
           </tbody>
         </table>
       </div>
-
-      <div class="matrix-legend">
-        <span class="matrix-legend-item"><span class="matrix-legend-dot cell-green"></span>Fastest (bottom 30%)</span>
-        <span class="matrix-legend-item"><span class="matrix-legend-dot cell-yellow"></span>Mid range</span>
-        <span class="matrix-legend-item"><span class="matrix-legend-dot cell-red"></span>Slowest (top 30%)</span>
-      </div>
-
-      <div class="matrix-fastest" id="matrixFastest">
-        <!-- Populated by JS -->
-      </div>
-
-      <p class="matrix-note" id="matrixNote">
-        Run <code id="matrixCmd">modelping pipeline --stt all --llm llama-3.3-70b-versatile --tts all</code> to reproduce.
-      </p>
     </div>
-  </section>
 
-  <!-- ═══════════════════════════════════════════
-       ROADMAP
-  ════════════════════════════════════════════ -->
-  <section class="section roadmap-section" id="roadmap">
-    <div class="container">
-      <div class="section-title-wrap"><h2 class="section-title">Roadmap</h2></div>
-      <p class="section-sub">What's built and what's coming.</p>
-      <div class="roadmap-list">
-        <div class="roadmap-item">
-          <div class="roadmap-status roadmap-status-done">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M2 6l2.5 2.5L10 3.5" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <span>LLM benchmarking — TTFT, throughput, cost</span>
-        </div>
-        <div class="roadmap-item">
-          <div class="roadmap-status roadmap-status-done">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M2 6l2.5 2.5L10 3.5" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <span>STT benchmarking — transcription latency</span>
-        </div>
-        <div class="roadmap-item">
-          <div class="roadmap-status roadmap-status-done">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M2 6l2.5 2.5L10 3.5" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <span>TTS benchmarking — time to first audio byte</span>
-        </div>
-        <div class="roadmap-item">
-          <div class="roadmap-status roadmap-status-done">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M2 6l2.5 2.5L10 3.5" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <span>Full STT→LLM→TTS pipeline benchmark</span>
-        </div>
-        <div class="roadmap-item">
-          <div class="roadmap-status roadmap-status-done">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <path d="M2 6l2.5 2.5L10 3.5" stroke="#00ff88" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <span>Community leaderboard — global rankings, regional data</span>
-        </div>
-        <div class="roadmap-item roadmap-item-pending">
-          <div class="roadmap-status roadmap-status-pending">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <circle cx="6" cy="6" r="4.5" stroke="#444" stroke-width="1.5"/>
-              <path d="M4 6h4" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <span>Network routing latency — how much does geography cost you?</span>
-        </div>
-        <div class="roadmap-item roadmap-item-pending">
-          <div class="roadmap-status roadmap-status-pending">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <circle cx="6" cy="6" r="4.5" stroke="#444" stroke-width="1.5"/>
-              <path d="M4 6h4" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <span>Concurrency benchmarks — latency under load</span>
-        </div>
-        <div class="roadmap-item roadmap-item-pending">
-          <div class="roadmap-status roadmap-status-pending">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-              <circle cx="6" cy="6" r="4.5" stroke="#444" stroke-width="1.5"/>
-              <path d="M4 6h4" stroke="#555" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-          </div>
-          <span>Hardware benchmarks — GPU architecture vs real-world inference</span>
-        </div>
+    <!-- STT tab -->
+    <div class="tab-panel" id="tab-stt">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Provider</th>
+              <th>Latency P50</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="model-name">whisper-large-v3</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#f55036"></div>groq</div></td>
+              <td class="mono">360ms</td>
+            </tr>
+            <tr>
+              <td class="model-name">whisper-large-v3-turbo</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#f55036"></div>groq</div></td>
+              <td class="mono">527ms</td>
+            </tr>
+            <tr>
+              <td class="model-name">nova-3</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#13ebe0"></div>deepgram</div></td>
+              <td class="mono">583ms</td>
+            </tr>
+            <tr>
+              <td class="model-name">nova-2</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#13ebe0"></div>deepgram</div></td>
+              <td class="mono">622ms</td>
+            </tr>
+            <tr>
+              <td class="model-name">gpt-4o-transcribe</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#74aa9c"></div>openai</div></td>
+              <td class="mono">799ms</td>
+            </tr>
+            <tr>
+              <td class="model-name">universal-2</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#6366f1"></div>assemblyai</div></td>
+              <td class="mono">1725ms</td>
+            </tr>
+            <tr>
+              <td class="model-name">universal-3-pro</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#6366f1"></div>assemblyai</div></td>
+              <td class="mono">2855ms</td>
+            </tr>
+            <tr>
+              <td class="model-name">default</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#a78bfa"></div>gladia</div></td>
+              <td class="mono">3452ms</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-  </section>
 
-  <!-- ═══════════════════════════════════════════
-       PROVIDERS
-  ════════════════════════════════════════════ -->
-  <section class="section providers-section" id="providers">
-    <div class="container">
-      <div class="section-title-wrap"><h2 class="section-title">Supported Providers</h2></div>
-      <p class="section-sub">Missing a provider? Request it.</p>
-
-      <div class="providers-rows">
-
-        <div class="provider-row">
-          <span class="provider-row-label">LLM</span>
-          <div class="providers-grid">
-            <div class="provider-badge openai"><span class="provider-dot"></span>OpenAI</div>
-            <div class="provider-badge anthropic"><span class="provider-dot"></span>Anthropic</div>
-            <div class="provider-badge google"><span class="provider-dot"></span>Google</div>
-            <div class="provider-badge groq"><span class="provider-dot"></span>Groq</div>
-            <div class="provider-badge fireworks"><span class="provider-dot"></span>Fireworks</div>
-            <div class="provider-badge together"><span class="provider-dot"></span>Together AI</div>
-            <div class="provider-badge mistral"><span class="provider-dot"></span>Mistral</div>
-            <div class="provider-badge cohere"><span class="provider-dot"></span>Cohere</div>
-          </div>
-        </div>
-
-        <div class="provider-row">
-          <span class="provider-row-label">STT</span>
-          <div class="providers-grid">
-            <div class="provider-badge groq-whisper"><span class="provider-dot"></span>Groq Whisper</div>
-            <div class="provider-badge openai-whisper"><span class="provider-dot"></span>OpenAI Whisper</div>
-            <div class="provider-badge deepgram"><span class="provider-dot"></span>Deepgram</div>
-            <div class="provider-badge assemblyai"><span class="provider-dot"></span>AssemblyAI</div>
-            <div class="provider-badge gladia"><span class="provider-dot"></span>Gladia</div>
-          </div>
-        </div>
-
-        <div class="provider-row">
-          <span class="provider-row-label">TTS</span>
-          <div class="providers-grid">
-            <div class="provider-badge elevenlabs"><span class="provider-dot"></span>ElevenLabs</div>
-            <div class="provider-badge cartesia"><span class="provider-dot"></span>Cartesia</div>
-            <div class="provider-badge fish-audio"><span class="provider-dot"></span>Fish Audio</div>
-            <div class="provider-badge playht"><span class="provider-dot"></span>PlayHT</div>
-            <div class="provider-badge deepgram-aura"><span class="provider-dot"></span>Deepgram Aura</div>
-            <div class="provider-badge lmnt"><span class="provider-dot"></span>LMNT</div>
-          </div>
-        </div>
-
-        <div class="provider-row">
-          <span class="provider-row-label"></span>
-          <div class="providers-grid">
-            <a href="/benchmark" class="provider-badge provider-request">
-              <span class="provider-dot" style="background:#333; border: 1px solid #444"></span>
-              + Request a provider
-            </a>
-          </div>
-        </div>
-
+    <!-- TTS tab -->
+    <div class="tab-panel" id="tab-tts">
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Provider</th>
+              <th>TTFB P50</th>
+              <th>Realtime Factor</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="model-name">aura-luna</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#13ebe0"></div>deepgram</div></td>
+              <td class="mono">156ms</td>
+              <td class="rtf-yellow">2.7x</td>
+            </tr>
+            <tr>
+              <td class="model-name">sonic-2</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#fc4b0b"></div>cartesia</div></td>
+              <td class="mono">200ms</td>
+              <td class="rtf-yellow">3.9x</td>
+            </tr>
+            <tr>
+              <td class="model-name">sonic-english</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#fc4b0b"></div>cartesia</div></td>
+              <td class="mono">210ms</td>
+              <td class="rtf-red">1.9x</td>
+            </tr>
+            <tr>
+              <td class="model-name">aurora</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#3b82f6"></div>lmnt</div></td>
+              <td class="mono">298ms</td>
+              <td class="rtf-yellow">2.8x</td>
+            </tr>
+            <tr>
+              <td class="model-name">blizzard</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#3b82f6"></div>lmnt</div></td>
+              <td class="mono">310ms</td>
+              <td class="rtf-yellow">3.5x</td>
+            </tr>
+            <tr>
+              <td class="model-name">flash-v2.5</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#f59e0b"></div>elevenlabs</div></td>
+              <td class="mono">374ms</td>
+              <td class="rtf-green">11.3x</td>
+            </tr>
+            <tr>
+              <td class="model-name">tts-1</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#74aa9c"></div>openai</div></td>
+              <td class="mono">1050ms</td>
+              <td class="rtf-yellow">3.6x</td>
+            </tr>
+            <tr>
+              <td class="model-name">multilingual-v2</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#f59e0b"></div>elevenlabs</div></td>
+              <td class="mono">1277ms</td>
+              <td class="rtf-yellow">4.0x</td>
+            </tr>
+            <tr>
+              <td class="model-name">tts-1-hd</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#74aa9c"></div>openai</div></td>
+              <td class="mono">2010ms</td>
+              <td class="rtf-yellow">2.3x</td>
+            </tr>
+            <tr>
+              <td class="model-name">default</td>
+              <td><div class="provider-cell"><div class="provider-dot" style="background:#ec4899"></div>fish-audio</div></td>
+              <td class="mono">2511ms</td>
+              <td class="rtf-yellow">2.9x</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- ═══════════════════════════════════════════
-       FOOTER
-  ════════════════════════════════════════════ -->
-  <footer class="footer">
-    <div class="container footer-inner">
-      <div class="footer-left">
-        <span class="footer-logo">LatencyGrid</span>
-        <span class="footer-sep">·</span>
-        <span class="footer-dim">Open source</span>
-        <span class="footer-sep">·</span>
-        <span class="footer-dim">MIT License</span>
-        <span class="footer-sep">·</span>
-        <a href="https://github.com/LatencyGrid/modelping" target="_blank" rel="noopener" class="footer-dim footer-link">github.com/LatencyGrid/modelping</a>
+<div class="section-divider"></div>
+
+<!-- ===== PIPELINE LATENCY MATRIX ===== -->
+<section id="matrix">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Pipeline Latency Matrix</h2>
+      <p class="section-sub">Total end-to-end latency for common STT + LLM + TTS combinations. Select an LLM to recalculate.</p>
+    </div>
+
+    <div class="matrix-controls">
+      <label for="llmSelect">LLM</label>
+      <select class="llm-select" id="llmSelect">
+        <option value="109" data-label="groq/kimi-k2">Groq kimi-k2 (109ms)</option>
+        <option value="114" data-label="groq/llama-3.1-8b-instant">Groq Llama 3.1 8B (114ms)</option>
+        <option value="140" data-label="groq/llama-3.3-70b-versatile" selected>Groq Llama 3.3 70B (140ms)</option>
+        <option value="380" data-label="openai/gpt-4o">GPT-4o (380ms)</option>
+        <option value="463" data-label="anthropic/claude-haiku-4-5">Claude Haiku 4.5 (463ms)</option>
+        <option value="508" data-label="openai/gpt-4o-mini">GPT-4o-mini (508ms)</option>
+        <option value="936" data-label="google/gemini-2.5-flash">Gemini 2.5 Flash (936ms)</option>
+      </select>
+    </div>
+
+    <div class="matrix-table-wrapper">
+      <table class="matrix-table" id="matrixTable">
+        <thead>
+          <tr>
+            <th>STT \ TTS</th>
+            <th>Cartesia Sonic-2<br><span style="font-weight:400;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">200ms</span></th>
+            <th>Deepgram Luna<br><span style="font-weight:400;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">156ms</span></th>
+            <th>ElevenLabs Flash<br><span style="font-weight:400;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">374ms</span></th>
+            <th>LMNT Aurora<br><span style="font-weight:400;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">298ms</span></th>
+          </tr>
+        </thead>
+        <tbody id="matrixBody">
+          <!-- JS-populated -->
+        </tbody>
+      </table>
+    </div>
+
+    <div class="matrix-fastest-line" id="matrixFastestLine">
+      Fastest: <strong id="fastestLabel">—</strong>
+    </div>
+
+    <div class="command-block">
+      <div class="command-text" id="commandText">
+        <span class="cmd-binary">modelping</span>
+        <span class="cmd-flag"> pipeline</span>
+        <span class="cmd-flag"> --stt </span><span class="cmd-value">groq/whisper-large-v3</span>
+        <span class="cmd-flag"> --llm </span><span id="cmdLlmValue" class="cmd-value">groq/llama-3.3-70b-versatile</span>
+        <span class="cmd-flag"> --tts </span><span class="cmd-value">cartesia/sonic-2</span>
+      </div>
+      <button class="copy-btn" id="copyBtn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+        </svg>
+        Copy
+      </button>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===== ROADMAP ===== -->
+<section id="roadmap">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">What we're building</h2>
+    </div>
+
+    <div class="roadmap-grid">
+      <!-- Done -->
+      <div>
+        <div class="roadmap-column-title">Done</div>
+        <div class="roadmap-items">
+          <div class="roadmap-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>LLM benchmarking — TTFT, throughput, cost</span>
+          </div>
+          <div class="roadmap-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>STT benchmarking — transcription latency</span>
+          </div>
+          <div class="roadmap-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>TTS benchmarking — time to first audio byte</span>
+          </div>
+          <div class="roadmap-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>STT+LLM+TTS pipeline benchmark</span>
+          </div>
+          <div class="roadmap-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span>Community leaderboard</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Coming -->
+      <div>
+        <div class="roadmap-column-title">Coming</div>
+        <div class="roadmap-items">
+          <div class="roadmap-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>Network routing latency</span>
+          </div>
+          <div class="roadmap-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>Concurrency benchmarks</span>
+          </div>
+          <div class="roadmap-item">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#52525b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+            <span>Hardware inference benchmarks</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===== SUPPORTED PROVIDERS ===== -->
+<section id="providers">
+  <div class="container">
+    <div class="section-header">
+      <h2 class="section-title">Supported Providers</h2>
+      <p class="section-sub">Missing a provider? <a href="/benchmark.html" style="color:var(--accent);">Request it →</a></p>
+    </div>
+
+    <div class="provider-rows">
+      <!-- LLM -->
+      <div class="provider-row">
+        <div class="provider-row-label">LLM</div>
+        <div class="provider-chips">
+          <div class="chip"><div class="chip-dot" style="background:#74aa9c"></div>OpenAI</div>
+          <div class="chip"><div class="chip-dot" style="background:#d4a5a5"></div>Anthropic</div>
+          <div class="chip"><div class="chip-dot" style="background:#4285f4"></div>Google</div>
+          <div class="chip"><div class="chip-dot" style="background:#f55036"></div>Groq</div>
+          <div class="chip"><div class="chip-dot" style="background:#ff6b35"></div>Fireworks</div>
+          <div class="chip"><div class="chip-dot" style="background:#a78bfa"></div>Together AI</div>
+          <div class="chip"><div class="chip-dot" style="background:#f59e0b"></div>Mistral</div>
+          <div class="chip"><div class="chip-dot" style="background:#6366f1"></div>Cohere</div>
+        </div>
+      </div>
+
+      <!-- STT -->
+      <div class="provider-row">
+        <div class="provider-row-label">STT</div>
+        <div class="provider-chips">
+          <div class="chip"><div class="chip-dot" style="background:#f55036"></div>Groq Whisper</div>
+          <div class="chip"><div class="chip-dot" style="background:#74aa9c"></div>OpenAI Whisper</div>
+          <div class="chip"><div class="chip-dot" style="background:#13ebe0"></div>Deepgram</div>
+          <div class="chip"><div class="chip-dot" style="background:#6366f1"></div>AssemblyAI</div>
+          <div class="chip"><div class="chip-dot" style="background:#a78bfa"></div>Gladia</div>
+        </div>
+      </div>
+
+      <!-- TTS -->
+      <div class="provider-row">
+        <div class="provider-row-label">TTS</div>
+        <div class="provider-chips">
+          <div class="chip"><div class="chip-dot" style="background:#f59e0b"></div>ElevenLabs</div>
+          <div class="chip"><div class="chip-dot" style="background:#fc4b0b"></div>Cartesia</div>
+          <div class="chip"><div class="chip-dot" style="background:#ec4899"></div>Fish Audio</div>
+          <div class="chip"><div class="chip-dot" style="background:#8b5cf6"></div>PlayHT</div>
+          <div class="chip"><div class="chip-dot" style="background:#13ebe0"></div>Deepgram Aura</div>
+          <div class="chip"><div class="chip-dot" style="background:#3b82f6"></div>LMNT</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <div class="container">
+    <div class="footer-inner">
+      <div>
+        <div class="footer-brand">LatencyGrid</div>
+        <div class="footer-links">
+          <span>Open source</span>
+          <span class="footer-sep">·</span>
+          <span>MIT License</span>
+          <span class="footer-sep">·</span>
+          <a href="mailto:hello@latencygrid.dev">hello@latencygrid.dev</a>
+        </div>
       </div>
       <div class="footer-right">
-        <span class="footer-dim">Data updated daily</span>
-        <span class="footer-sep">·</span>
-        <a href="mailto:hello@latencygrid.dev" class="footer-dim footer-link">hello@latencygrid.dev</a>
+        <div class="footer-data-note">Data updated daily</div>
       </div>
     </div>
-  </footer>
+  </div>
+</footer>
 
-  <script>
-    // ── Nav scroll border ──
-    window.addEventListener('scroll', function() {
-      document.querySelector('.nav').classList.toggle('scrolled', window.scrollY > 20);
+<script>
+(function() {
+  // ===== NAV SCROLL =====
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', function() {
+    nav.classList.toggle('scrolled', window.scrollY > 20);
+  }, { passive: true });
+
+  // ===== MOBILE NAV =====
+  const mobileToggle = document.getElementById('mobileToggle');
+  const navLinks = document.getElementById('navLinks');
+  mobileToggle.addEventListener('click', function() {
+    navLinks.classList.toggle('open');
+  });
+
+  // ===== TAB SWITCHING =====
+  const tabBtns = document.querySelectorAll('.tab-btn');
+  const tabPanels = document.querySelectorAll('.tab-panel');
+  tabBtns.forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const target = btn.getAttribute('data-tab');
+      tabBtns.forEach(function(b) { b.classList.remove('active'); });
+      tabPanels.forEach(function(p) { p.classList.remove('active'); });
+      btn.classList.add('active');
+      document.getElementById('tab-' + target).classList.add('active');
     });
-  </script>
+  });
 
-  <script>
-    // ── Leaderboard tab switching ──
-    document.querySelectorAll('.lb-tab').forEach(function(tab) {
-      tab.addEventListener('click', function() {
-        var tabId = this.getAttribute('data-tab');
-        document.querySelectorAll('.lb-tab').forEach(function(t) {
-          t.classList.remove('active');
-          t.setAttribute('aria-selected', 'false');
-        });
-        document.querySelectorAll('.lb-panel').forEach(function(p) {
-          p.style.display = 'none';
-        });
-        this.classList.add('active');
-        this.setAttribute('aria-selected', 'true');
-        document.getElementById('tab-' + tabId).style.display = 'block';
+  // ===== MATRIX =====
+  const sttProviders = [
+    { label: 'Groq Whisper', ms: 360 },
+    { label: 'Deepgram Nova-3', ms: 583 },
+    { label: 'OpenAI Whisper', ms: 799 }
+  ];
+
+  const ttsProviders = [
+    { label: 'Cartesia Sonic-2', ms: 200, cmdKey: 'cartesia/sonic-2' },
+    { label: 'Deepgram Luna', ms: 156, cmdKey: 'deepgram/aura-luna-en' },
+    { label: 'ElevenLabs Flash', ms: 374, cmdKey: 'elevenlabs/flash-v2.5' },
+    { label: 'LMNT Aurora', ms: 298, cmdKey: 'lmnt/aurora' }
+  ];
+
+  const sttCmdKeys = [
+    'groq/whisper-large-v3',
+    'deepgram/nova-3',
+    'openai/whisper-1'
+  ];
+
+  function getThresholds(values) {
+    const sorted = [...values].sort(function(a, b) { return a - b; });
+    const low = sorted[Math.floor(sorted.length * 0.3)];
+    const high = sorted[Math.floor(sorted.length * 0.7)];
+    return { low, high };
+  }
+
+  function colorCell(val, low, high) {
+    if (val <= low) return '#22c55e';
+    if (val >= high) return '#ef4444';
+    return '#fafafa';
+  }
+
+  function renderMatrix(llmMs) {
+    const tbody = document.getElementById('matrixBody');
+    const cells = [];
+
+    // Compute all values
+    const rows = sttProviders.map(function(stt) {
+      return ttsProviders.map(function(tts) {
+        return stt.ms + llmMs + tts.ms;
       });
     });
-  </script>
 
-  <script>
-    // ── Interactive Pipeline Matrix ──
-    var STT = [
-      { name: 'Groq Whisper',     ms: 360, cmd: 'groq/whisper-large-v3' },
-      { name: 'Deepgram Nova-3',  ms: 583, cmd: 'deepgram/nova-3' },
-      { name: 'OpenAI Whisper',   ms: 799, cmd: 'openai/gpt-4o-transcribe' }
-    ];
+    const allVals = rows.flat();
+    const { low, high } = getThresholds(allVals);
+    const minVal = Math.min.apply(null, allVals);
 
-    var TTS = [
-      { name: 'Cartesia Sonic-2',  ms: 200, cmd: 'cartesia/sonic-2' },
-      { name: 'Deepgram Luna',     ms: 156, cmd: 'deepgram/aura-luna' },
-      { name: 'ElevenLabs Flash',  ms: 374, cmd: 'elevenlabs/flash-v2.5' },
-      { name: 'LMNT Aurora',       ms: 298, cmd: 'lmnt/aurora' }
-    ];
+    let fastestStt = '', fastestTts = '', fastestTotal = 0;
+    let fastestSttCmd = '', fastestTtsCmd = '';
 
-    var LLM_CMDS = {
-      'groq-llama-3.3-70b': 'llama-3.3-70b-versatile',
-      'groq-llama-3.1-8b':  'llama-3.1-8b-instant',
-      'groq-kimi-k2':       'kimi-k2',
-      'gpt-4o-mini':        'gpt-4o-mini',
-      'gpt-4o':             'gpt-4o',
-      'claude-haiku-4-5':   'claude-haiku-4-5',
-      'gemini-2.5-flash':   'gemini-2.5-flash'
-    };
+    tbody.innerHTML = '';
+    rows.forEach(function(rowVals, si) {
+      const tr = document.createElement('tr');
+      const th = document.createElement('td');
+      th.className = 'row-header';
+      th.textContent = sttProviders[si].label;
+      tr.appendChild(th);
 
-    function getLLMTTFT() {
-      var sel = document.getElementById('llmSelect');
-      var opt = sel.options[sel.selectedIndex];
-      return parseInt(opt.getAttribute('data-ttft'), 10);
+      rowVals.forEach(function(val, ti) {
+        const td = document.createElement('td');
+        const isMin = (val === minVal);
+
+        if (isMin) {
+          td.className = 'cell-fastest';
+          td.style.color = '#00e5ff';
+          fastestStt = sttProviders[si].label;
+          fastestTts = ttsProviders[ti].label;
+          fastestTotal = val;
+          fastestSttCmd = sttCmdKeys[si];
+          fastestTtsCmd = ttsProviders[ti].cmdKey;
+        } else {
+          td.style.color = colorCell(val, low, high);
+        }
+        td.style.fontFamily = 'var(--font-mono)';
+        td.textContent = val + 'ms';
+        tr.appendChild(td);
+      });
+
+      tbody.appendChild(tr);
+    });
+
+    // Update fastest line
+    document.getElementById('fastestLabel').textContent =
+      fastestStt + ' + LLM + ' + fastestTts + ' = ' + fastestTotal + 'ms';
+
+    return { fastestSttCmd, fastestTtsCmd };
+  }
+
+  function getLlmLabel(select) {
+    const opt = select.options[select.selectedIndex];
+    return opt.getAttribute('data-label') || 'groq/llama-3.3-70b-versatile';
+  }
+
+  function updateCommand(llmLabel, ttsCmd) {
+    const cmdLlmValue = document.getElementById('cmdLlmValue');
+    cmdLlmValue.textContent = llmLabel;
+  }
+
+  function updateMatrix() {
+    const select = document.getElementById('llmSelect');
+    const llmMs = parseInt(select.value, 10);
+    const llmLabel = getLlmLabel(select);
+    const { fastestSttCmd, fastestTtsCmd } = renderMatrix(llmMs);
+    updateCommand(llmLabel, fastestTtsCmd);
+
+    // Update URL param
+    const url = new URL(window.location.href);
+    url.searchParams.set('llm', llmLabel);
+    history.replaceState(null, '', url.toString());
+  }
+
+  // Init from URL param
+  (function initFromUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const llmParam = params.get('llm');
+    if (llmParam) {
+      const select = document.getElementById('llmSelect');
+      for (let i = 0; i < select.options.length; i++) {
+        if (select.options[i].getAttribute('data-label') === llmParam) {
+          select.selectedIndex = i;
+          break;
+        }
+      }
     }
+  })();
 
-    function getLLMValue() {
-      return document.getElementById('llmSelect').value;
-    }
+  document.getElementById('llmSelect').addEventListener('change', updateMatrix);
+  updateMatrix();
 
-    function renderMatrix() {
-      var ttft = getLLMTTFT();
-      var llmKey = getLLMValue();
-
-      // Compute all cell values
-      var cells = [];
-      for (var i = 0; i < STT.length; i++) {
-        for (var j = 0; j < TTS.length; j++) {
-          cells.push(STT[i].ms + ttft + TTS[j].ms);
-        }
-      }
-
-      // Compute color thresholds
-      var sorted = cells.slice().sort(function(a, b) { return a - b; });
-      var n = sorted.length; // 12
-      var greenMax  = sorted[Math.ceil(n * 0.30) - 1];
-      var yellowMax = sorted[Math.ceil(n * 0.70) - 1];
-
-      function cellClass(val) {
-        if (val <= greenMax)  return 'cell-green';
-        if (val <= yellowMax) return 'cell-yellow';
-        return 'cell-red';
-      }
-
-      // Find fastest combination
-      var minVal = sorted[0];
-      var minStt = null, minTts = null;
-      var minSttIdx = -1, minTtsIdx = -1;
-      outer: for (var i = 0; i < STT.length; i++) {
-        for (var j = 0; j < TTS.length; j++) {
-          if (STT[i].ms + ttft + TTS[j].ms === minVal) {
-            minStt = STT[i];
-            minTts = TTS[j];
-            minSttIdx = i;
-            minTtsIdx = j;
-            break outer;
-          }
-        }
-      }
-
-      // Render tbody
-      var tbody = document.getElementById('matrixBody');
-      var html = '';
-      for (var i = 0; i < STT.length; i++) {
-        html += '<tr>';
-        html += '<td class="matrix-row-label">' + STT[i].name + '</td>';
-        for (var j = 0; j < TTS.length; j++) {
-          var val = STT[i].ms + ttft + TTS[j].ms;
-          var cls = cellClass(val);
-          var isFastest = (i === minSttIdx && j === minTtsIdx) ? ' matrix-cell-fastest' : '';
-          html += '<td class="matrix-cell ' + cls + isFastest + '">' + val + 'ms</td>';
-        }
-        html += '</tr>';
-      }
-      tbody.innerHTML = html;
-
-      // Update fastest line
-      var llmLabel = document.getElementById('llmSelect').options[document.getElementById('llmSelect').selectedIndex].text.split(' —')[0];
-      document.getElementById('matrixFastest').innerHTML =
-        'Fastest combination: <strong>' + minStt.name + '</strong> + <strong>' + llmLabel + '</strong> + <strong>' + minTts.name + '</strong> = <strong class="matrix-fastest-val">' + minVal + 'ms</strong>';
-
-      // Update modelping command
-      var llmCmd = LLM_CMDS[llmKey] || llmKey;
-      document.getElementById('matrixCmd').textContent =
-        'modelping pipeline --stt all --llm ' + llmCmd + ' --tts all';
-
-      // Update URL param
-      var url = new URL(window.location.href);
-      url.searchParams.set('llm', llmKey);
-      history.replaceState(null, '', url.toString());
-    }
-
-    // On page load: read URL param
-    (function() {
-      var params = new URLSearchParams(window.location.search);
-      var llmParam = params.get('llm');
-      if (llmParam) {
-        var sel = document.getElementById('llmSelect');
-        for (var i = 0; i < sel.options.length; i++) {
-          if (sel.options[i].value === llmParam) {
-            sel.selectedIndex = i;
-            break;
-          }
-        }
-      }
-      renderMatrix();
-    })();
-
-    document.getElementById('llmSelect').addEventListener('change', renderMatrix);
-  </script>
+  // ===== COPY TO CLIPBOARD =====
+  document.getElementById('copyBtn').addEventListener('click', function() {
+    const select = document.getElementById('llmSelect');
+    const llmLabel = getLlmLabel(select);
+    const cmd = 'modelping pipeline --stt groq/whisper-large-v3 --llm ' + llmLabel + ' --tts cartesia/sonic-2';
+    navigator.clipboard.writeText(cmd).then(function() {
+      const btn = document.getElementById('copyBtn');
+      btn.classList.add('copied');
+      btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied';
+      setTimeout(function() {
+        btn.classList.remove('copied');
+        btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copy';
+      }, 2000);
+    });
+  });
+})();
+</script>
 </body>
 </html>
