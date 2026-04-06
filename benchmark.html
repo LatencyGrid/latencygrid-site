@@ -363,11 +363,10 @@
     <nav class="nav">
       <a href="/" class="nav-logo" style="text-decoration:none; color: inherit;">LatencyGrid</a>
       <div class="nav-links">
-        <a href="/quiz">Quiz</a>
-        <a href="/#quickstart">Docs</a>
-        <a href="/regions">Regions</a>
         <a href="/leaderboard">Leaderboard</a>
-        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener">GitHub</a>
+        <a href="/quiz">Stack Builder</a>
+        <a href="/benchmark" class="nav-active">Benchmark</a>
+        <a href="https://github.com/LatencyGrid/modelping" target="_blank" rel="noopener">GitHub</a>
       </div>
     </nav>
   </section>
@@ -474,7 +473,9 @@
 
         <!-- Confirmation -->
         <div class="benchmark-form form-confirmation" id="formConfirmation">
-          <div class="form-confirmation-icon">✅</div>
+          <div class="form-confirmation-icon">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
           <h3>Request received.</h3>
           <p>We'll be in touch within 24 hours with your benchmark results.<br>
           Check your inbox — we'll reply with secure key submission instructions first.</p>
@@ -487,7 +488,7 @@
           <div class="wyg-title">What you'll get</div>
 
           <div class="wyg-item">
-            <div class="wyg-icon">📊</div>
+            <div class="wyg-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg></div>
             <div class="wyg-item-content">
               <div class="wyg-item-title">P50 / P95 / P99 measurements</div>
               <div class="wyg-item-sub">Full percentile distribution for TTFT, TTFB, and throughput. No synthetic averages.</div>
@@ -495,7 +496,7 @@
           </div>
 
           <div class="wyg-item">
-            <div class="wyg-icon">⚔️</div>
+            <div class="wyg-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg></div>
             <div class="wyg-item-content">
               <div class="wyg-item-title">Comparison vs all providers</div>
               <div class="wyg-item-sub">Side-by-side against every model in our benchmark database.</div>
@@ -503,7 +504,7 @@
           </div>
 
           <div class="wyg-item">
-            <div class="wyg-icon">🌍</div>
+            <div class="wyg-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg></div>
             <div class="wyg-item-content">
               <div class="wyg-item-title">Regional latency from 2+ locations</div>
               <div class="wyg-item-sub">North America and Europe at minimum. More on request.</div>
@@ -511,7 +512,7 @@
           </div>
 
           <div class="wyg-item">
-            <div class="wyg-icon">🔗</div>
+            <div class="wyg-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg></div>
             <div class="wyg-item-content">
               <div class="wyg-item-title">Shareable result URL</div>
               <div class="wyg-item-sub">Private link to your benchmark results. Share with your team or investors.</div>
@@ -519,7 +520,7 @@
           </div>
 
           <div class="wyg-item">
-            <div class="wyg-icon">📄</div>
+            <div class="wyg-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg></div>
             <div class="wyg-item-content">
               <div class="wyg-item-title">
                 PDF report
@@ -543,21 +544,19 @@
   <!-- FOOTER -->
   <footer class="footer">
     <div class="container footer-inner">
-      <div class="footer-brand">
+      <div class="footer-left">
         <span class="footer-logo">LatencyGrid</span>
-        <span class="footer-tagline">Built for the MLOps community</span>
+        <span class="footer-sep">·</span>
+        <span class="footer-dim">Open source</span>
+        <span class="footer-sep">·</span>
+        <span class="footer-dim">MIT License</span>
+        <span class="footer-sep">·</span>
+        <a href="https://github.com/LatencyGrid/modelping" target="_blank" rel="noopener" class="footer-dim footer-link">github.com/LatencyGrid/modelping</a>
       </div>
-      <div class="footer-links">
-        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
-          </svg>
-          GitHub
-        </a>
-        <a href="https://github.com/latencygrid/modelping/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
-      </div>
-      <div class="footer-meta">
-        A <strong>LatencyGrid</strong> project · <span class="dim">latencygrid.dev</span>
+      <div class="footer-right">
+        <span class="footer-dim">Data updated daily</span>
+        <span class="footer-sep">·</span>
+        <a href="mailto:hello@latencygrid.dev" class="footer-dim footer-link">hello@latencygrid.dev</a>
       </div>
     </div>
   </footer>

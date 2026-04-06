@@ -360,11 +360,10 @@
     <nav class="nav">
       <a href="/" class="nav-logo" style="text-decoration:none; color: inherit;">LatencyGrid</a>
       <div class="nav-links">
-        <a href="/quiz">Quiz</a>
-        <a href="/#quickstart">Docs</a>
-        <a href="/regions">Regions</a>
         <a href="/leaderboard">Leaderboard</a>
-        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener">GitHub</a>
+        <a href="/quiz">Stack Builder</a>
+        <a href="/benchmark">Benchmark</a>
+        <a href="https://github.com/LatencyGrid/modelping" target="_blank" rel="noopener">GitHub</a>
       </div>
     </nav>
   </section>
@@ -377,7 +376,7 @@
 
   <!-- Error / not found state -->
   <div class="error-state" id="errorState">
-    <div class="error-icon">📡</div>
+    <div class="error-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"></path><path d="M1.42 9a16 16 0 0 1 21.16 0"></path><path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path><line x1="12" y1="20" x2="12.01" y2="20"></line></svg></div>
     <h2 id="errorTitle">Submission not found</h2>
     <p id="errorMsg">This benchmark submission could not be found or may have been removed.</p>
     <a href="/leaderboard" class="back-btn">← Back to leaderboard</a>
@@ -520,11 +519,11 @@
       parts.push(`<span class="meta-pill region">${regionLabel}</span>`);
 
       if (sub.location) {
-        parts.push(`<span class="meta-pill">📍 ${sub.location}</span>`);
+        parts.push(`<span class="meta-pill">${sub.location}</span>`);
       }
 
       if (sub.timestamp) {
-        parts.push(`<span class="meta-pill">🗓 ${formatDate(sub.timestamp)}</span>`);
+        parts.push(`<span class="meta-pill">${formatDate(sub.timestamp)}</span>`);
       }
 
       if (sub.modelping_version) {
