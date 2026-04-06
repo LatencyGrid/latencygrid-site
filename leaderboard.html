@@ -379,7 +379,8 @@
             <th>Region</th>
             <th>Location</th>
             <th>Date</th>
-            <th>Fastest LLM (TTFT)</th>
+            <th>Pipeline (E2E)</th>
+            <th>Fastest LLM</th>
             <th>Fastest STT</th>
             <th>Fastest TTS</th>
             <th></th>
@@ -474,18 +475,36 @@
       document.getElementById('emptyState').style.display = 'none';
       document.getElementById('resultsTable').style.display = 'table';
 
+      // Compute color thresholds for pipeline column
+      const pipelineVals = submissions.map(s => s.fastest_pipeline_ms).filter(v => v != null);
+      const pipelineSorted = [...pipelineVals].sort((a,b) => a - b);
+      const p30 = pipelineSorted[Math.floor(pipelineSorted.length * 0.3)];
+      const p70 = pipelineSorted[Math.floor(pipelineSorted.length * 0.7)];
+
       submissions.forEach(sub => {
         const regionLabel = REGION_LABELS[sub.region] || sub.region || '—';
-        // Use pre-computed summary fields from index, fall back to computing from arrays
         const llmMs = sub.fastest_llm_ms ?? getFastestLLM(sub.llm);
         const sttMs = sub.fastest_stt_ms ?? getFastestSTT(sub.stt);
         const ttsMs = sub.fastest_tts_ms ?? getFastestTTS(sub.tts);
+        const pipelineMs = sub.fastest_pipeline_ms ?? null;
+
+        // Color pipeline cell
+        let pipelineColor = '';
+        if (pipelineMs != null) {
+          if (pipelineMs <= p30) pipelineColor = 'color:#22c55e;font-weight:600';
+          else if (pipelineMs >= p70) pipelineColor = 'color:#ef4444';
+        }
+
+        const pipelineCell = pipelineMs != null
+          ? `<span style="${pipelineColor}">${formatMs(pipelineMs)}</span>`
+          : '<span style="opacity:0.3">—</span>';
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
           <td><span class="region-badge">${regionLabel}</span></td>
           <td class="muted">${sub.location || '—'}</td>
           <td class="muted mono">${formatDate(sub.timestamp)}</td>
+          <td class="mono">${pipelineCell}</td>
           <td class="mono">${llmMs != null ? formatMs(llmMs) : '<span style="opacity:0.3">—</span>'}</td>
           <td class="mono">${sttMs != null ? formatMs(sttMs) : '<span style="opacity:0.3">—</span>'}</td>
           <td class="mono">${ttsMs != null ? formatMs(ttsMs) : '<span style="opacity:0.3">—</span>'}</td>
