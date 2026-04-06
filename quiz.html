@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stack Recommendation Quiz — LatencyGrid</title>
+  <meta name="description" content="Find your optimal STT+LLM+TTS stack for voice AI. Answer 3 questions and get a personalized recommendation with real latency data." />
+
+  <meta property="og:title" content="Stack Recommendation Quiz — LatencyGrid" />
+  <meta property="og:description" content="Find your optimal STT+LLM+TTS stack for voice AI in 3 questions." />
+  <meta property="og:url" content="https://latencygrid.dev/quiz" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="https://latencygrid.dev/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    /* ── Quiz page styles ── */
+    .quiz-hero {
+      background: var(--bg);
+      padding-bottom: 0;
+      min-height: auto;
+    }
+
+    .quiz-main {
+      min-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 3rem 1rem 5rem;
+    }
+
+    .quiz-container {
+      width: 100%;
+      max-width: 680px;
+    }
+
+    /* Progress */
+    .quiz-progress {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .quiz-progress-label {
+      font-size: 0.8rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--dim);
+      white-space: nowrap;
+    }
+
+    .quiz-progress-track {
+      flex: 1;
+      height: 3px;
+      background: rgba(255,255,255,0.08);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .quiz-progress-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.4s ease;
+    }
+
+    /* Question */
+    .quiz-question {
+      display: none;
+      animation: slideIn 0.35s ease both;
+    }
+
+    .quiz-question.active {
+      display: block;
+    }
+
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .quiz-q-label {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.75rem;
+    }
+
+    .quiz-q-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 2rem;
+      line-height: 1.3;
+    }
+
+    /* Option cards */
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .quiz-option {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: rgba(255,255,255,0.03);
+      border: 1.5px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      cursor: pointer;
+      transition: border-color 0.2s, background 0.2s, transform 0.15s;
+      user-select: none;
+    }
+
+    .quiz-option:hover {
+      border-color: rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.055);
+      transform: translateY(-1px);
+    }
+
+    .quiz-option.selected {
+      border-color: var(--accent);
+      background: rgba(0, 255, 136, 0.06);
+    }
+
+    .quiz-option-emoji {
+      font-size: 1.5rem;
+      flex-shrink: 0;
+      width: 2rem;
+      text-align: center;
+    }
+
+    .quiz-option-text {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .quiz-option-check {
+      margin-left: auto;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.2);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .quiz-option.selected .quiz-option-check {
+      border-color: var(--accent);
+      background: var(--accent);
+    }
+
+    .quiz-option.selected .quiz-option-check::after {
+      content: '';
+      display: block;
+      width: 6px;
+      height: 10px;
+      border-right: 2px solid #000;
+      border-bottom: 2px solid #000;
+      transform: rotate(45deg) translate(-1px, -1px);
+    }
+
+    /* Next button */
+    .quiz-next-wrap {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .quiz-next {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: var(--accent);
+      color: #000;
+      font-weight: 600;
+      font-size: 0.95rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+
+    .quiz-next:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+      transform: none !important;
+    }
+
+    .quiz-next:not(:disabled):hover {
+      opacity: 0.88;
+      transform: translateY(-1px);
+    }
+
+    /* ── Result ── */
+    .quiz-result {
+      display: none;
+    }
+
+    .quiz-result.active {
+      display: block;
+      animation: resultReveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+    }
+
+    @keyframes resultReveal {
+      from { opacity: 0; transform: scale(0.97) translateY(20px); }
+      to   { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .result-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 0.2rem 0.6rem;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+
+    .result-title {
+      font-size: 1.8rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .result-sub {
+      color: var(--dim);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      line-height: 1.6;
+    }
+
+    /* Stack breakdown */
+    .result-stack {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .result-stack-title {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 1.25rem;
+    }
+
+    .result-stage {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .result-stage-left {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      min-width: 0;
+    }
+
+    .result-stage-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .result-stage-info {
+      min-width: 0;
+    }
+
+    .result-stage-label {
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--dim);
+      text-transform: uppercase;
+    }
+
+    .result-stage-model {
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .result-stage-ms {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.9rem;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    /* Pipeline bar */
+    .result-pipeline-bar {
+      display: flex;
+      height: 32px;
+      border-radius: 6px;
+      overflow: hidden;
+      margin: 1.25rem 0 0.5rem;
+      gap: 2px;
+    }
+
+    .result-pipeline-seg {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 600;
+      color: rgba(0,0,0,0.75);
+      transition: width 0.6s ease;
+      min-width: 0;
+      overflow: hidden;
+    }
+
+    .result-seg-stt { background: #3b82f6; }
+    .result-seg-llm { background: #8b5cf6; }
+    .result-seg-tts { background: #00ff88; }
+
+    .result-pipeline-total {
+      text-align: right;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.85rem;
+      color: var(--dim);
+    }
+
+    .result-pipeline-total strong {
+      color: var(--accent);
+    }
+
+    /* Command */
+    .result-cmd-wrap {
+      margin-bottom: 1.5rem;
+    }
+
+    .result-cmd-label {
+      font-size: 0.75rem;
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+    }
+
+    .result-cmd {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: #0a0a0a;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .result-cmd:hover {
+      border-color: rgba(255,255,255,0.25);
+    }
+
+    .result-cmd code {
+      flex: 1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--accent);
+      word-break: break-all;
+    }
+
+    .result-cmd-copy {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--dim);
+      flex-shrink: 0;
+      padding: 0;
+      transition: color 0.2s;
+    }
+
+    .result-cmd-copy:hover { color: var(--text); }
+
+    /* Actions */
+    .result-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 2rem;
+    }
+
+    .result-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.65rem 1.1rem;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+      text-decoration: none;
+    }
+
+    .result-btn:hover {
+      opacity: 0.82;
+      transform: translateY(-1px);
+    }
+
+    .result-btn-primary {
+      background: var(--accent);
+      color: #000;
+      border: none;
+    }
+
+    .result-btn-secondary {
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border: 1px solid rgba(255,255,255,0.12);
+    }
+
+    .retake-link {
+      display: block;
+      text-align: center;
+      color: var(--dim);
+      font-size: 0.85rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: color 0.2s;
+    }
+
+    .retake-link:hover { color: var(--text); }
+
+    /* CSS variables fallbacks in case styles.css is different */
+    :root {
+      --accent: #00ff88;
+      --dim: #666;
+      --text: #f0f0f0;
+      --bg: #0d0d0d;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- NAV -->
+  <section class="hero quiz-hero">
+    <nav class="nav">
+      <a href="/" class="nav-logo" style="text-decoration:none; color: inherit;">LatencyGrid</a>
+      <div class="nav-links">
+        <a href="/quiz" class="nav-active">Quiz</a>
+        <a href="/#quickstart">Docs</a>
+        <a href="/regions">Regions</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </nav>
+  </section>
+
+  <!-- QUIZ MAIN -->
+  <main class="quiz-main">
+    <div class="quiz-container">
+
+      <!-- Progress bar -->
+      <div class="quiz-progress" id="quizProgress">
+        <span class="quiz-progress-label" id="progressLabel">Question 1 of 3</span>
+        <div class="quiz-progress-track">
+          <div class="quiz-progress-fill" id="progressFill" style="width: 33%"></div>
+        </div>
+      </div>
+
+      <!-- ── Question 1 ── -->
+      <div class="quiz-question active" id="q1">
+        <div class="quiz-q-label">Question 1 of 3</div>
+        <h2 class="quiz-q-title">What matters most to you?</h2>
+        <div class="quiz-options" data-question="1">
+          <div class="quiz-option" data-value="speed">
+            <span class="quiz-option-emoji">⚡</span>
+            <span class="quiz-option-text">Lowest possible latency (speed)</span>
+            <span class="quiz-option-check"></span>
+          </div>
+          <div class="quiz-option" data-value="cost">
+            <span class="quiz-option-emoji">💰</span>
+            <span class="quiz-option-text">Best cost efficiency</span>
+            <span class="quiz-option-check"></span>
+          </div>
+          <div class="quiz-option" data-value="quality">
+            <span class="quiz-option-emoji">🎯</span>
+            <span class="quiz-option-text">Highest accuracy / quality</span>
+            <span class="quiz-option-check"></span>
+          </div>
+          <div class="quiz-option" data-value="balance">
+            <span class="quiz-option-emoji">⚖️</span>
+            <span class="quiz-option-text">Balance of all three</span>
+            <span class="quiz-option-check"></span>
+          </div>
+        </div>
+        <div class="quiz-next-wrap">
+          <button class="quiz-next" id="next1" disabled onclick="goToQ(2)">Next →</button>
+        </div>
+      </div>
+
+      <!-- ── Question 2 ── -->
+      <div class="quiz-question" id="q2">
+        <div class="quiz-q-label">Question 2 of 3</div>
+        <h2 class="quiz-q-title">Where are most of your users located?</h2>
+        <div class="quiz-options" data-question="2">
+          <div class="quiz-option" data-value="north_america">
+            <span class="quiz-option-emoji">🌎</span>
+            <span class="quiz-option-text">North America</span>
+            <span class="quiz-option-check"></span>
+          </div>
+          <div class="quiz-option" data-value="europe">
+            <span class="quiz-option-emoji">🌍</span>
+            <span class="quiz-option-text">Europe</span>
+            <span class="quiz-option-check"></span>
+          </div>
+          <div class="quiz-option" data-value="asia">
+            <span class="quiz-option-emoji">🌏</span>
+            <span class="quiz-option-text">Asia Pacific</span>
+            <span class="quiz-option-check"></span>
+          </div>
+          <div class="quiz-option" data-value="global">
+            <span class="quiz-option-emoji">🌐</span>
+            <span class="quiz-option-text">Global / distributed</span>
+            <span class="quiz-option-check"></span>
+          </div>
+        </div>
+        <div class="quiz-next-wrap">
+          <button class="quiz-next" id="next2" disabled onclick="goToQ(3)">Next →</button>
+        </div>
+      </div>
+
+      <!-- ── Question 3 ── -->
+      <div class="quiz-question" id="q3">
+        <div class="quiz-q-label">Question 3 of 3</div>
+        <h2 class="quiz-q-title">What's your expected request volume?</h2>
+        <div class="quiz-options" data-question="3">
+          <div class="quiz-option" data-value="prototype">
+            <span class="quiz-option-emoji">🛠</span>
+            <span class="quiz-option-text">Prototype / low volume (&lt;100 req/day)</span>
+            <span class="quiz-option-check"></span>
+          </div>
+          <div class="quiz-option" data-value="growing">
+            <span class="quiz-option-emoji">📈</span>
+            <span class="quiz-option-text">Growing product (100–10K req/day)</span>
+            <span class="quiz-option-check"></span>
+          </div>
+          <div class="quiz-option" data-value="production">
+            <span class="quiz-option-emoji">🏭</span>
+            <span class="quiz-option-text">Production scale (10K+ req/day)</span>
+            <span class="quiz-option-check"></span>
+          </div>
+        </div>
+        <div class="quiz-next-wrap">
+          <button class="quiz-next" id="next3" disabled onclick="showResult()">See my recommendation →</button>
+        </div>
+      </div>
+
+      <!-- ── Result ── -->
+      <div class="quiz-result" id="quizResult">
+        <div class="result-badge" id="resultBadge">Speed-optimized</div>
+        <h2 class="result-title" id="resultTitle">Your recommended stack</h2>
+        <p class="result-sub" id="resultSub">Fastest available stack. All three providers optimized for low latency.</p>
+
+        <div class="result-stack">
+          <div class="result-stack-title">Per-stage breakdown</div>
+
+          <div class="result-stage">
+            <div class="result-stage-left">
+              <div class="result-stage-dot result-seg-stt"></div>
+              <div class="result-stage-info">
+                <div class="result-stage-label">STT</div>
+                <div class="result-stage-model" id="resSttModel">Groq Whisper Large v3</div>
+              </div>
+            </div>
+            <div class="result-stage-ms" id="resSttMs">360ms</div>
+          </div>
+
+          <div class="result-stage">
+            <div class="result-stage-left">
+              <div class="result-stage-dot result-seg-llm"></div>
+              <div class="result-stage-info">
+                <div class="result-stage-label">LLM</div>
+                <div class="result-stage-model" id="resLlmModel">Groq Llama 3.3 70B</div>
+              </div>
+            </div>
+            <div class="result-stage-ms" id="resLlmMs">140ms</div>
+          </div>
+
+          <div class="result-stage">
+            <div class="result-stage-left">
+              <div class="result-stage-dot result-seg-tts"></div>
+              <div class="result-stage-info">
+                <div class="result-stage-label">TTS</div>
+                <div class="result-stage-model" id="resTtsModel">Deepgram Aura Luna</div>
+              </div>
+            </div>
+            <div class="result-stage-ms" id="resTtsMs">156ms</div>
+          </div>
+
+          <!-- Pipeline bar -->
+          <div class="result-pipeline-bar" id="resPipelineBar">
+            <div class="result-pipeline-seg result-seg-stt" id="resBarStt" style="width:55%">STT</div>
+            <div class="result-pipeline-seg result-seg-llm" id="resBarLlm" style="width:21%">LLM</div>
+            <div class="result-pipeline-seg result-seg-tts" id="resBarTts" style="width:24%">TTS</div>
+          </div>
+          <div class="result-pipeline-total">Total pipeline: <strong id="resTotalMs">~656ms</strong></div>
+        </div>
+
+        <!-- Command to verify -->
+        <div class="result-cmd-wrap">
+          <div class="result-cmd-label">Verify with modelping</div>
+          <div class="result-cmd" onclick="copyCmd()" title="Click to copy">
+            <code id="resCmd">modelping pipeline --stt groq/whisper-large-v3 --llm llama-3.3-70b-versatile --tts deepgram/aura-luna</code>
+            <button class="result-cmd-copy" aria-label="Copy command">
+              <svg id="cmdCopyIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <svg id="cmdCheckIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#00ff88" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="result-actions">
+          <button class="result-btn result-btn-primary" onclick="shareResult()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle>
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+            </svg>
+            Share your result
+          </button>
+          <a href="/" class="result-btn result-btn-secondary">
+            See full benchmarks →
+          </a>
+          <a href="/submit" class="result-btn result-btn-secondary">
+            Submit your own results →
+          </a>
+        </div>
+
+        <span class="retake-link" onclick="retakeQuiz()">← Retake the quiz</span>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="footer-logo">LatencyGrid</span>
+        <span class="footer-tagline">Built for the MLOps community</span>
+      </div>
+      <div class="footer-links">
+        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+          </svg>
+          GitHub
+        </a>
+        <a href="https://github.com/latencygrid/modelping/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a>
+      </div>
+      <div class="footer-meta">
+        A <strong>LatencyGrid</strong> project · <span class="dim">latencygrid.dev</span>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // ── State ──
+    const answers = { q1: null, q2: null, q3: null };
+
+    // ── Stacks ──
+    const STACKS = {
+      speed: {
+        badge: 'Speed-optimized',
+        title: 'Fastest available stack',
+        sub: 'Fastest available stack. All three providers optimized for low latency.',
+        stt: { model: 'Groq Whisper Large v3', ms: 360, cmd: 'groq/whisper-large-v3' },
+        llm: { model: 'Groq Llama 3.3 70B', ms: 140, cmd: 'llama-3.3-70b-versatile' },
+        tts: { model: 'Deepgram Aura Luna', ms: 156, cmd: 'deepgram/aura-luna' },
+        total: 656,
+      },
+      cost: {
+        badge: 'Cost-optimized',
+        title: 'Best cost per request',
+        sub: 'Best cost per request without sacrificing too much speed. Groq free tier is generous.',
+        stt: { model: 'Groq Whisper Large v3', ms: 360, cmd: 'groq/whisper-large-v3' },
+        llm: { model: 'Groq Llama 3.1 8B', ms: 114, cmd: 'llama-3.1-8b-instant' },
+        tts: { model: 'Deepgram Aura', ms: 156, cmd: 'deepgram/aura-asteria' },
+        total: 630,
+      },
+      quality: {
+        badge: 'Quality-optimized',
+        title: 'Highest quality output',
+        sub: 'Highest quality output. Best for customer-facing applications where accuracy matters most.',
+        stt: { model: 'OpenAI gpt-4o-transcribe', ms: 799, cmd: 'openai/gpt-4o-transcribe' },
+        llm: { model: 'Claude Haiku 4.5', ms: 463, cmd: 'claude-haiku-4-5' },
+        tts: { model: 'ElevenLabs Flash v2.5', ms: 374, cmd: 'elevenlabs/flash-v2.5' },
+        total: 1636,
+      },
+      balance: {
+        badge: 'Balanced',
+        title: 'Strong balance of speed, cost, and quality',
+        sub: 'Strong balance of speed, cost, and quality. The default recommendation for most teams.',
+        stt: { model: 'Deepgram Nova-3', ms: 583, cmd: 'deepgram/nova-3' },
+        llm: { model: 'Groq Llama 3.3 70B', ms: 140, cmd: 'llama-3.3-70b-versatile' },
+        tts: { model: 'Cartesia Sonic-2', ms: 200, cmd: 'cartesia/sonic-2' },
+        total: 923,
+      }
+    };
+
+    // ── Recommendation logic ──
+    function getRecommendation(q1, q2, q3) {
+      // Primary driver is q1 (what matters most)
+      // q2 (region) and q3 (volume) can nudge the result
+      if (q1 === 'speed') {
+        // All regions can use speed stack; high volume may prefer cost
+        if (q3 === 'prototype' && q2 !== 'asia') return 'speed';
+        return 'speed';
+      }
+      if (q1 === 'cost') {
+        return 'cost';
+      }
+      if (q1 === 'quality') {
+        return 'quality';
+      }
+      // balance
+      if (q3 === 'production' && q2 === 'global') return 'balance';
+      return 'balance';
+    }
+
+    // ── Option selection ──
+    document.querySelectorAll('.quiz-options').forEach(function(group) {
+      group.querySelectorAll('.quiz-option').forEach(function(opt) {
+        opt.addEventListener('click', function() {
+          group.querySelectorAll('.quiz-option').forEach(function(o) {
+            o.classList.remove('selected');
+          });
+          opt.classList.add('selected');
+
+          var qNum = group.getAttribute('data-question');
+          answers['q' + qNum] = opt.getAttribute('data-value');
+          document.getElementById('next' + qNum).disabled = false;
+        });
+      });
+    });
+
+    // ── Navigation ──
+    function goToQ(num) {
+      // Hide all questions
+      document.querySelectorAll('.quiz-question').forEach(function(q) {
+        q.classList.remove('active');
+      });
+      var target = document.getElementById('q' + num);
+      target.classList.add('active');
+
+      // Update progress
+      var fill = ((num) / 3 * 100);
+      document.getElementById('progressFill').style.width = fill + '%';
+      document.getElementById('progressLabel').textContent = 'Question ' + num + ' of 3';
+    }
+
+    function showResult() {
+      var rec = getRecommendation(answers.q1, answers.q2, answers.q3);
+      var stack = STACKS[rec];
+
+      // Populate result
+      document.getElementById('resultBadge').textContent = stack.badge;
+      document.getElementById('resultTitle').textContent = stack.title;
+      document.getElementById('resultSub').textContent = stack.sub;
+      document.getElementById('resSttModel').textContent = stack.stt.model;
+      document.getElementById('resSttMs').textContent = stack.stt.ms + 'ms';
+      document.getElementById('resLlmModel').textContent = stack.llm.model;
+      document.getElementById('resLlmMs').textContent = stack.llm.ms + 'ms';
+      document.getElementById('resTtsModel').textContent = stack.tts.model;
+      document.getElementById('resTtsMs').textContent = stack.tts.ms + 'ms';
+      document.getElementById('resTotalMs').textContent = '~' + stack.total + 'ms';
+
+      // Pipeline bar proportions
+      var total = stack.stt.ms + stack.llm.ms + stack.tts.ms;
+      var sttPct = ((stack.stt.ms / total) * 100).toFixed(1);
+      var llmPct = ((stack.llm.ms / total) * 100).toFixed(1);
+      var ttsPct = ((stack.tts.ms / total) * 100).toFixed(1);
+      document.getElementById('resBarStt').style.width = sttPct + '%';
+      document.getElementById('resBarLlm').style.width = llmPct + '%';
+      document.getElementById('resBarTts').style.width = ttsPct + '%';
+
+      // Command
+      var cmd = 'modelping pipeline --stt ' + stack.stt.cmd + ' --llm ' + stack.llm.cmd + ' --tts ' + stack.tts.cmd;
+      document.getElementById('resCmd').textContent = cmd;
+
+      // Update URL params
+      var params = new URLSearchParams({
+        priority: answers.q1,
+        region: answers.q2,
+        volume: answers.q3,
+        rec: rec
+      });
+      history.replaceState(null, '', '/quiz?' + params.toString());
+
+      // Show result, hide progress
+      document.querySelectorAll('.quiz-question').forEach(function(q) {
+        q.classList.remove('active');
+      });
+      document.getElementById('quizProgress').style.display = 'none';
+      document.getElementById('quizResult').classList.add('active');
+    }
+
+    function retakeQuiz() {
+      answers.q1 = answers.q2 = answers.q3 = null;
+      document.querySelectorAll('.quiz-option').forEach(function(o) {
+        o.classList.remove('selected');
+      });
+      document.querySelectorAll('.quiz-next').forEach(function(b) {
+        b.disabled = true;
+      });
+      document.getElementById('quizResult').classList.remove('active');
+      document.getElementById('quizProgress').style.display = 'flex';
+      document.getElementById('progressFill').style.width = '33%';
+      document.getElementById('progressLabel').textContent = 'Question 1 of 3';
+      document.getElementById('q1').classList.add('active');
+      history.replaceState(null, '', '/quiz');
+    }
+
+    function copyCmd() {
+      var cmd = document.getElementById('resCmd').textContent;
+      navigator.clipboard.writeText(cmd).then(function() {
+        document.getElementById('cmdCopyIcon').style.display = 'none';
+        document.getElementById('cmdCheckIcon').style.display = 'inline';
+        setTimeout(function() {
+          document.getElementById('cmdCopyIcon').style.display = 'inline';
+          document.getElementById('cmdCheckIcon').style.display = 'none';
+        }, 2000);
+      });
+    }
+
+    function shareResult() {
+      var url = window.location.href;
+      navigator.clipboard.writeText(url).then(function() {
+        // Briefly change button text
+        var btn = document.querySelector('.result-btn-primary');
+        var orig = btn.innerHTML;
+        btn.innerHTML = '✓ Link copied!';
+        setTimeout(function() { btn.innerHTML = orig; }, 2000);
+      }).catch(function() {
+        // Fallback: alert
+        prompt('Copy this URL to share your result:', url);
+      });
+    }
+
+    // ── On load: check URL params ──
+    (function() {
+      var params = new URLSearchParams(window.location.search);
+      var rec = params.get('rec');
+      var priority = params.get('priority');
+      var region = params.get('region');
+      var volume = params.get('volume');
+      if (rec && STACKS[rec] && priority && region && volume) {
+        answers.q1 = priority;
+        answers.q2 = region;
+        answers.q3 = volume;
+        showResult();
+      }
+    })();
+  </script>
+</body>
+</html>
