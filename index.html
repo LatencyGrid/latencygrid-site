@@ -17,6 +17,17 @@
     .loading-pulse {
       animation: loadingPulse 1.2s ease-in-out infinite;
     }
+    .hero-freshness {
+      font-size: 12px;
+      font-family: var(--font-mono, monospace);
+      color: #52525b;
+      margin-bottom: 20px;
+    }
+    .stat-qualifier {
+      font-size: 11px;
+      color: #52525b;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
@@ -54,8 +65,14 @@
     <div class="hero-tag">Voice AI Infrastructure</div>
     <h1 class="hero-title">Voice AI Pipeline Latency</h1>
     <p class="hero-sub">
-      Updated daily <span>·</span> 20+ providers <span>·</span> Real measurements
+      Benchmarks run daily <span>·</span> Results vary by region, load, and time of day
     </p>
+
+    <div class="hero-freshness">
+      <span id="heroDate">Today's fastest measurements</span>
+      <span class="meta-sep">·</span>
+      <span id="heroLocation">Ottawa, Canada</span>
+    </div>
 
     <div class="hero-stats">
       <!-- Fastest pipeline -->
@@ -66,6 +83,7 @@
           <div class="stat-label">Fastest Pipeline</div>
         </div>
         <div class="stat-meta">groq → groq → cartesia</div>
+        <div class="stat-qualifier">as of today · varies by region</div>
       </div>
 
       <!-- Fastest LLM -->
@@ -967,6 +985,12 @@
           document.getElementById('heroFastestTTSmeta').textContent = ttsParts[ttsParts.length - 1];
         }
       }
+
+      // Hero freshness line
+      var heroDateEl = document.getElementById('heroDate');
+      var heroLocEl = document.getElementById('heroLocation');
+      if (heroDateEl) heroDateEl.textContent = "Today's fastest · " + formatDate(sub.timestamp);
+      if (heroLocEl) heroLocEl.textContent = sub.location || '';
 
       // Metadata strip
       document.getElementById('metaLocation').textContent = sub.location || '';
