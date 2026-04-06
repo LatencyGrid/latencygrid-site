@@ -177,7 +177,7 @@ section {
 /* Stat cards */
 .hero-stats {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
   max-width: 780px;
   margin: 0 auto;
@@ -867,8 +867,11 @@ footer {
   .hero-title { font-size: 32px; }
 
   .hero-stats {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, 1fr);
     max-width: 100%;
+  }
+  .hero-stats-4 {
+    grid-template-columns: repeat(2, 1fr);
   }
 
   .roadmap-grid {

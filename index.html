@@ -1083,6 +1083,24 @@
         document.getElementById('heroFastestLLMmeta').textContent = bestLLM.model + ' via ' + (bestLLM.provider || '');
       }
 
+      // Hero: Fastest STT
+      if (stt.length) {
+        var validSTT = stt.filter(function(m) {
+          return (m.latency_p50 != null || m.transcription_latency_ms != null);
+        });
+        if (validSTT.length) {
+          var bestSTT = validSTT.reduce(function(a, b) {
+            var av = a.latency_p50 != null ? a.latency_p50 : a.transcription_latency_ms;
+            var bv = b.latency_p50 != null ? b.latency_p50 : b.transcription_latency_ms;
+            return av < bv ? a : b;
+          });
+          var bestSTTms = bestSTT.latency_p50 != null ? bestSTT.latency_p50 : bestSTT.transcription_latency_ms;
+          document.getElementById('heroFastestSTT').textContent = Math.round(bestSTTms) + 'ms';
+          var sttParts = (bestSTT.model || '').split('/');
+          document.getElementById('heroFastestSTTmeta').textContent = sttParts[sttParts.length - 1].replace(/-/g, ' ');
+        }
+      }
+
       // Hero: Fastest TTS
       if (tts.length) {
         var bestTTS = tts.reduce(function(a, b){
@@ -1094,14 +1112,14 @@
         if (bestTTFB != null) {
           document.getElementById('heroFastestTTS').textContent = Math.round(bestTTFB) + 'ms';
           var ttsParts = (bestTTS.model || '').split('/');
-          document.getElementById('heroFastestTTSmeta').textContent = ttsParts[ttsParts.length - 1];
+          document.getElementById('heroFastestTTSmeta').textContent = ttsParts[ttsParts.length - 1].replace(/-/g, ' ');
         }
       }
 
       // Hero freshness line
       var heroDateEl = document.getElementById('heroDate');
       var heroLocEl = document.getElementById('heroLocation');
-      if (heroDateEl) heroDateEl.textContent = "Today's fastest · " + formatDate(sub.timestamp);
+      if (heroDateEl) heroDateEl.textContent = "Today's fastest · " + formatDate(sub.timestamp) + ' · best across all regions';
       if (heroLocEl) heroLocEl.textContent = sub.location || '';
 
       // Metadata strip
