@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Benchmark Results — LatencyGrid</title>
+  <meta name="description" content="View detailed benchmark results for this community submission on LatencyGrid." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .submission-page {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 56px 24px 120px;
+    }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--fg-muted, #a0a0a0);
+      text-decoration: none;
+      margin-bottom: 28px;
+      transition: color 0.15s;
+    }
+
+    .back-link:hover {
+      color: var(--accent, #00ff88);
+    }
+
+    /* Page header */
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 800;
+      color: var(--fg, #e8e8e8);
+      margin: 0 0 20px;
+      letter-spacing: -0.02em;
+    }
+
+    /* Metadata pills */
+    .meta-pills {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .meta-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 4px;
+      background: #0d0d0d;
+      border: 1px solid #1e1e1e;
+      color: var(--text-mid, #a0a0a0);
+    }
+
+    .meta-pill.region {
+      background: rgba(0, 255, 136, 0.08);
+      border-color: rgba(0, 255, 136, 0.2);
+      color: var(--accent, #00ff88);
+    }
+
+    /* Section title */
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--fg, #e8e8e8);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 48px 0 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-title::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #1e1e1e;
+    }
+
+    /* Table */
+    .table-wrapper {
+      overflow-x: auto;
+      border: 1px solid #1e1e1e;
+      border-radius: 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+
+    thead th {
+      background: #0d0d0d;
+      color: var(--text-mid, #a0a0a0);
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #1e1e1e;
+      white-space: nowrap;
+    }
+
+    tbody tr {
+      border-bottom: 1px solid #111;
+      transition: background 0.1s;
+    }
+
+    tbody tr:last-child {
+      border-bottom: none;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    td {
+      padding: 13px 16px;
+      color: var(--fg, #e8e8e8);
+      vertical-align: middle;
+    }
+
+    td.mono {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+    }
+
+    td.muted {
+      color: var(--text-mid, #a0a0a0);
+    }
+
+    /* Fastest row accent */
+    tr.fastest-row {
+      border-left: 3px solid var(--accent, #00ff88);
+    }
+
+    tr.fastest-row td:first-child {
+      padding-left: 13px;
+    }
+
+    /* Error row */
+    tr.error-row {
+      opacity: 0.55;
+    }
+
+    tr.error-row td {
+      color: #ff6b6b;
+    }
+
+    tr.error-row td.mono {
+      color: #ff6b6b;
+    }
+
+    /* Provider dot */
+    .provider-cell {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+
+    .provider-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* Loading state */
+    .loading-state {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      padding: 100px 24px;
+      color: var(--text-mid, #a0a0a0);
+      font-size: 14px;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(0, 255, 136, 0.2);
+      border-top-color: var(--accent, #00ff88);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Error / not found state */
+    .error-state {
+      display: none;
+      text-align: center;
+      padding: 100px 24px;
+    }
+
+    .error-icon {
+      font-size: 44px;
+      margin-bottom: 20px;
+    }
+
+    .error-state h2 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--fg, #e8e8e8);
+      margin: 0 0 10px;
+    }
+
+    .error-state p {
+      font-size: 14px;
+      color: var(--text-mid, #a0a0a0);
+      margin: 0 0 28px;
+    }
+
+    .back-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg, #e8e8e8);
+      background: transparent;
+      border: 1px solid #333;
+      border-radius: 6px;
+      padding: 9px 18px;
+      text-decoration: none;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .back-btn:hover {
+      border-color: var(--accent, #00ff88);
+      color: var(--accent, #00ff88);
+    }
+
+    /* Share section */
+    .share-section {
+      margin-top: 56px;
+      padding: 24px 28px;
+      background: #0d0d0d;
+      border: 1px solid #1e1e1e;
+      border-radius: 10px;
+    }
+
+    .share-section h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-mid, #a0a0a0);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin: 0 0 12px;
+    }
+
+    .share-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .share-url-box {
+      flex: 1;
+      min-width: 240px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      background: #0a0a0a;
+      border: 1px solid #222;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .share-url-text {
+      flex: 1;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text-mid, #a0a0a0);
+      padding: 9px 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      cursor: text;
+      user-select: all;
+    }
+
+    .copy-btn {
+      font-family: 'Inter', sans-serif;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-mid, #a0a0a0);
+      background: #151515;
+      border: none;
+      border-left: 1px solid #222;
+      padding: 9px 14px;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+      white-space: nowrap;
+    }
+
+    .copy-btn:hover {
+      background: #1e1e1e;
+      color: var(--accent, #00ff88);
+    }
+
+    .copy-btn.copied {
+      color: var(--accent, #00ff88);
+    }
+
+    .submit-link {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--accent, #00ff88);
+      text-decoration: none;
+      white-space: nowrap;
+      transition: opacity 0.15s;
+    }
+
+    .submit-link:hover {
+      opacity: 0.8;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .share-row {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .submit-link {
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero" style="padding-bottom: 0; min-height: auto;">
+    <nav class="nav">
+      <a href="/" class="nav-logo" style="text-decoration:none; color: inherit;">LatencyGrid</a>
+      <div class="nav-links">
+        <a href="/#quickstart">Docs</a>
+        <a href="/regions">Regions</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </nav>
+  </section>
+
+  <!-- Loading state (full page) -->
+  <div class="loading-state" id="loadingState">
+    <div class="spinner"></div>
+    Loading benchmark results...
+  </div>
+
+  <!-- Error / not found state -->
+  <div class="error-state" id="errorState">
+    <div class="error-icon">📡</div>
+    <h2 id="errorTitle">Submission not found</h2>
+    <p id="errorMsg">This benchmark submission could not be found or may have been removed.</p>
+    <a href="/leaderboard" class="back-btn">← Back to leaderboard</a>
+  </div>
+
+  <!-- Main content (hidden until loaded) -->
+  <main class="submission-page" id="mainContent" style="display:none">
+    <a href="/leaderboard" class="back-link">← Community Leaderboard</a>
+
+    <div class="page-header">
+      <h1 class="page-title">Benchmark Results</h1>
+      <div class="meta-pills" id="metaPills">
+        <!-- filled by JS -->
+      </div>
+    </div>
+
+    <!-- LLM section -->
+    <div id="llmSection" style="display:none">
+      <div class="section-title">LLM Benchmarks</div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Provider</th>
+              <th>TTFT P50</th>
+              <th>TTFT P95</th>
+              <th>Tok/s</th>
+              <th>Error Rate</th>
+            </tr>
+          </thead>
+          <tbody id="llmBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- STT section -->
+    <div id="sttSection" style="display:none">
+      <div class="section-title">STT Benchmarks</div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Provider</th>
+              <th>Latency P50</th>
+            </tr>
+          </thead>
+          <tbody id="sttBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- TTS section -->
+    <div id="ttsSection" style="display:none">
+      <div class="section-title">TTS Benchmarks</div>
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Model</th>
+              <th>Provider</th>
+              <th>TTFB P50</th>
+              <th>Realtime Factor</th>
+            </tr>
+          </thead>
+          <tbody id="ttsBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Share section -->
+    <div class="share-section" id="shareSection">
+      <h3>Share this benchmark</h3>
+      <div class="share-row">
+        <div class="share-url-box">
+          <span class="share-url-text" id="shareUrl"></span>
+          <button class="copy-btn" id="copyBtn" onclick="copyUrl()">Copy</button>
+        </div>
+        <a href="/submit" class="submit-link">Submit your own →</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const API_URL = 'https://api.latencygrid.dev';
+
+    const PROVIDER_COLORS = {
+      openai: '#74aa9c',
+      anthropic: '#d4a5a5',
+      google: '#4285f4',
+      groq: '#f55036',
+    };
+
+    const REGION_LABELS = {
+      'us-east': 'US East',
+      'us-west': 'US West',
+      'eu-west': 'EU West',
+      'asia-pacific': 'Asia Pacific',
+      'canada': 'Canada',
+      'other': 'Other',
+    };
+
+    function formatMs(val) {
+      if (val == null || isNaN(val)) return '—';
+      return val < 1000 ? `${Math.round(val)}ms` : `${(val / 1000).toFixed(2)}s`;
+    }
+
+    function formatDate(ts) {
+      try {
+        const d = new Date(ts);
+        return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      } catch { return '—'; }
+    }
+
+    function formatErrorRate(val) {
+      if (val == null || isNaN(val)) return '—';
+      if (val === 0) return '0%';
+      return `${(val * 100).toFixed(1)}%`;
+    }
+
+    function providerDot(provider) {
+      const color = PROVIDER_COLORS[provider?.toLowerCase()] || '#555';
+      return `<span class="provider-dot" style="background:${color}"></span>`;
+    }
+
+    function showError(title, msg) {
+      document.getElementById('loadingState').style.display = 'none';
+      const el = document.getElementById('errorState');
+      el.style.display = 'block';
+      if (title) document.getElementById('errorTitle').textContent = title;
+      if (msg) document.getElementById('errorMsg').textContent = msg;
+    }
+
+    function renderMetaPills(sub) {
+      const container = document.getElementById('metaPills');
+      const regionLabel = REGION_LABELS[sub.region] || sub.region || 'Unknown';
+      const parts = [];
+
+      parts.push(`<span class="meta-pill region">${regionLabel}</span>`);
+
+      if (sub.location) {
+        parts.push(`<span class="meta-pill">📍 ${sub.location}</span>`);
+      }
+
+      if (sub.timestamp) {
+        parts.push(`<span class="meta-pill">🗓 ${formatDate(sub.timestamp)}</span>`);
+      }
+
+      if (sub.modelping_version) {
+        parts.push(`<span class="meta-pill">modelping v${sub.modelping_version}</span>`);
+      }
+
+      container.innerHTML = parts.join('');
+    }
+
+    function renderLLM(llm) {
+      if (!Array.isArray(llm) || llm.length === 0) return;
+
+      // Sort: valid rows by TTFT P50 asc, then error rows
+      const valid = llm.filter(m => m.error_rate == null || m.error_rate < 1.0);
+      const errors = llm.filter(m => m.error_rate != null && m.error_rate >= 1.0);
+
+      valid.sort((a, b) => (a.ttft_p50 ?? Infinity) - (b.ttft_p50 ?? Infinity));
+
+      const allRows = [...valid, ...errors];
+      const fastestModel = valid.length > 0 ? valid[0].model : null;
+
+      const tbody = document.getElementById('llmBody');
+      tbody.innerHTML = '';
+
+      allRows.forEach((m, i) => {
+        const isError = m.error_rate != null && m.error_rate >= 1.0;
+        const isFastest = !isError && m.model === fastestModel && i === 0;
+
+        const tr = document.createElement('tr');
+        if (isFastest) tr.classList.add('fastest-row');
+        if (isError) tr.classList.add('error-row');
+
+        const ttftP50 = isError ? '<span style="opacity:0.6">error</span>' : `<span class="mono">${formatMs(m.ttft_p50)}</span>`;
+        const ttftP95 = isError ? '<span style="opacity:0.6">error</span>' : `<span class="mono">${formatMs(m.ttft_p95)}</span>`;
+        const toks = isError ? '—' : (m.throughput_p50 != null ? `${m.throughput_p50.toFixed(1)}` : '—');
+
+        tr.innerHTML = `
+          <td><strong>${m.model || '—'}</strong></td>
+          <td>
+            <div class="provider-cell">
+              ${providerDot(m.provider)}
+              <span class="muted">${m.provider || '—'}</span>
+            </div>
+          </td>
+          <td class="mono">${ttftP50}</td>
+          <td class="mono">${ttftP95}</td>
+          <td class="mono">${toks}</td>
+          <td class="mono">${formatErrorRate(m.error_rate)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('llmSection').style.display = 'block';
+    }
+
+    function renderSTT(stt) {
+      if (!Array.isArray(stt) || stt.length === 0) return;
+
+      const valid = stt.filter(m => m.latency_p50 != null || m.p50_latency_ms != null);
+      if (!valid.length) return;
+
+      valid.sort((a, b) => {
+        const aVal = a.latency_p50 ?? a.p50_latency_ms ?? Infinity;
+        const bVal = b.latency_p50 ?? b.p50_latency_ms ?? Infinity;
+        return aVal - bVal;
+      });
+
+      const tbody = document.getElementById('sttBody');
+      tbody.innerHTML = '';
+
+      valid.forEach(m => {
+        const latency = m.latency_p50 ?? m.p50_latency_ms;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${m.model || '—'}</strong></td>
+          <td>
+            <div class="provider-cell">
+              ${providerDot(m.provider)}
+              <span class="muted">${m.provider || '—'}</span>
+            </div>
+          </td>
+          <td class="mono">${formatMs(latency)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('sttSection').style.display = 'block';
+    }
+
+    function renderTTS(tts) {
+      if (!Array.isArray(tts) || tts.length === 0) return;
+
+      const valid = tts.filter(m => m.ttfb_p50 != null || m.p50_ttfb_ms != null);
+      if (!valid.length) return;
+
+      valid.sort((a, b) => {
+        const aVal = a.ttfb_p50 ?? a.p50_ttfb_ms ?? Infinity;
+        const bVal = b.ttfb_p50 ?? b.p50_ttfb_ms ?? Infinity;
+        return aVal - bVal;
+      });
+
+      const tbody = document.getElementById('ttsBody');
+      tbody.innerHTML = '';
+
+      valid.forEach(m => {
+        const ttfb = m.ttfb_p50 ?? m.p50_ttfb_ms;
+        const rtf = m.realtime_factor != null ? m.realtime_factor.toFixed(2) + 'x' : '—';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><strong>${m.model || '—'}</strong></td>
+          <td>
+            <div class="provider-cell">
+              ${providerDot(m.provider)}
+              <span class="muted">${m.provider || '—'}</span>
+            </div>
+          </td>
+          <td class="mono">${formatMs(ttfb)}</td>
+          <td class="mono">${rtf}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('ttsSection').style.display = 'block';
+    }
+
+    function copyUrl() {
+      const url = document.getElementById('shareUrl').textContent;
+      navigator.clipboard.writeText(url).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.textContent = 'Copied!';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = 'Copy';
+          btn.classList.remove('copied');
+        }, 2000);
+      }).catch(() => {
+        // Fallback: select text
+        const el = document.getElementById('shareUrl');
+        const range = document.createRange();
+        range.selectNodeContents(el);
+        window.getSelection().removeAllRanges();
+        window.getSelection().addRange(range);
+      });
+    }
+
+    async function load() {
+      const hash = window.location.hash.replace('#', '').trim();
+
+      if (!hash) {
+        showError('No submission ID', 'Please provide a submission ID in the URL hash, e.g. /submission#your-id-here');
+        return;
+      }
+
+      try {
+        const resp = await fetch(`${API_URL}/results/${encodeURIComponent(hash)}`);
+
+        if (resp.status === 404) {
+          showError('Submission not found', 'This benchmark submission could not be found or may have been removed.');
+          return;
+        }
+
+        if (!resp.ok) {
+          showError('Error loading submission', `Server returned ${resp.status}. Please try again later.`);
+          return;
+        }
+
+        const data = await resp.json();
+
+        if (!data.success || !data.submission) {
+          showError('Submission not found', data.error || 'This submission could not be loaded.');
+          return;
+        }
+
+        const sub = data.submission;
+
+        // Hide loader, show content
+        document.getElementById('loadingState').style.display = 'none';
+        document.getElementById('mainContent').style.display = 'block';
+
+        // Update page title
+        const regionLabel = { 'us-east': 'US East', 'us-west': 'US West', 'eu-west': 'EU West', 'asia-pacific': 'Asia Pacific', 'canada': 'Canada' }[sub.region] || sub.region || '';
+        document.title = `Benchmark Results — ${regionLabel || sub.location || 'Submission'} — LatencyGrid`;
+
+        // Render metadata
+        renderMetaPills(sub);
+
+        // Render tables
+        renderLLM(sub.llm);
+        renderSTT(sub.stt);
+        renderTTS(sub.tts);
+
+        // Share URL
+        const shareUrl = `https://latencygrid.dev/submission#${sub.id}`;
+        document.getElementById('shareUrl').textContent = shareUrl;
+
+      } catch (err) {
+        console.error('Failed to load submission:', err);
+        showError('Failed to load', 'Could not connect to the API. Please check your connection and try again.');
+      }
+    }
+
+    load();
+  </script>
+
+</body>
+</html>
