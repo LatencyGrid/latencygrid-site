@@ -82,34 +82,43 @@
       <span id="heroLocation">Ottawa, Canada</span>
     </div>
 
-    <div class="hero-stats">
+    <div class="hero-stats hero-stats-4">
       <!-- Fastest pipeline -->
       <div class="stat-card">
-        <div class="stat-number cyan">317ms</div>
+        <div class="stat-number cyan" id="heroFastestPipeline">697ms</div>
         <div class="stat-label-row">
           <div class="live-dot"></div>
-          <div class="stat-label">Fastest Pipeline</div>
+          <div class="stat-label">Fastest Pipeline E2E</div>
         </div>
-        <div class="stat-meta">groq → groq → cartesia</div>
+        <div class="stat-meta" id="heroFastestPipelinemeta">groq → groq → cartesia</div>
         <div class="stat-qualifier">as of today · varies by region</div>
       </div>
 
       <!-- Fastest LLM -->
       <div class="stat-card">
-        <div class="stat-number white" id="heroFastestLLM">109ms</div>
+        <div class="stat-number white" id="heroFastestLLM">137ms</div>
         <div class="stat-label-row">
           <div class="stat-label">Fastest LLM TTFT</div>
         </div>
-        <div class="stat-meta" id="heroFastestLLMmeta">kimi-k2 via groq</div>
+        <div class="stat-meta" id="heroFastestLLMmeta">llama-3.1-8b via groq</div>
+      </div>
+
+      <!-- Fastest STT -->
+      <div class="stat-card">
+        <div class="stat-number white" id="heroFastestSTT">235ms</div>
+        <div class="stat-label-row">
+          <div class="stat-label">Fastest STT</div>
+        </div>
+        <div class="stat-meta" id="heroFastestSTTmeta">groq whisper turbo</div>
       </div>
 
       <!-- Fastest TTS -->
       <div class="stat-card">
-        <div class="stat-number white" id="heroFastestTTS">156ms</div>
+        <div class="stat-number white" id="heroFastestTTS">122ms</div>
         <div class="stat-label-row">
           <div class="stat-label">Fastest TTS TTFB</div>
         </div>
-        <div class="stat-meta" id="heroFastestTTSmeta">deepgram aura-luna</div>
+        <div class="stat-meta" id="heroFastestTTSmeta">deepgram aura-asteria</div>
       </div>
     </div>
   </div>
