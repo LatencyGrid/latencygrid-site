@@ -751,8 +751,8 @@
 
     // Update URL param
     const url = new URL(window.location.href);
-    url.searchParams.set('llm', llmLabel);
-    history.replaceState(null, '', url.toString());
+    // URL stays clean — no query params
+    history.replaceState(null, '', window.location.pathname);
   }
 
   // Init from URL param
