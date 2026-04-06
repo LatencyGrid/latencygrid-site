@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Submit Benchmarks — LatencyGrid</title>
+  <meta name="description" content="Run modelping and share your latency benchmark results with the community." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <link rel="stylesheet" href="styles.css" />
+  <style>
+    .submit-page {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 80px 24px 120px;
+    }
+
+    .page-header {
+      margin-bottom: 48px;
+    }
+
+    .page-badge {
+      display: inline-block;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--accent);
+      background: rgba(0, 255, 136, 0.1);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      border-radius: 4px;
+      padding: 4px 10px;
+      margin-bottom: 16px;
+    }
+
+    .page-title {
+      font-size: clamp(28px, 5vw, 42px);
+      font-weight: 800;
+      color: var(--fg);
+      margin: 0 0 12px;
+      letter-spacing: -0.02em;
+    }
+
+    .page-sub {
+      font-size: 16px;
+      color: var(--fg-muted);
+      margin: 0;
+      line-height: 1.6;
+    }
+
+    .method-section {
+      margin-bottom: 48px;
+    }
+
+    .method-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 16px;
+    }
+
+    .method-label .badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      font-weight: 500;
+      background: rgba(0, 255, 136, 0.15);
+      color: var(--accent);
+      border-radius: 3px;
+      padding: 2px 7px;
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .method-label .badge.soon {
+      background: rgba(255, 200, 50, 0.1);
+      color: #ffc832;
+    }
+
+    .code-block {
+      background: #0a0a0a;
+      border: 1px solid #222;
+      border-radius: 8px;
+      padding: 20px 24px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      color: #c9d1d9;
+      overflow-x: auto;
+      position: relative;
+    }
+
+    .code-block .comment {
+      color: #6e7681;
+    }
+
+    .code-block .cmd {
+      color: #79c0ff;
+    }
+
+    .code-block .str {
+      color: #a5d6ff;
+    }
+
+    .code-note {
+      margin-top: 10px;
+      font-size: 12px;
+      color: var(--fg-muted);
+      opacity: 0.7;
+    }
+
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin: 40px 0;
+      color: var(--fg-muted);
+      font-size: 12px;
+      font-weight: 500;
+      opacity: 0.5;
+    }
+
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #222;
+    }
+
+    /* Form styles */
+    .submit-form {
+      background: #0d0d0d;
+      border: 1px solid #1e1e1e;
+      border-radius: 12px;
+      padding: 32px;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    @media (max-width: 560px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--fg-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      margin-bottom: 8px;
+    }
+
+    select, input[type="text"], input[type="email"], textarea {
+      width: 100%;
+      background: #0a0a0a;
+      border: 1px solid #2a2a2a;
+      border-radius: 6px;
+      color: var(--fg);
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      padding: 10px 14px;
+      box-sizing: border-box;
+      transition: border-color 0.15s;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 12px center;
+      padding-right: 36px;
+    }
+
+    select:focus, input:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(0, 255, 136, 0.08);
+    }
+
+    textarea {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      resize: vertical;
+      min-height: 180px;
+      line-height: 1.5;
+    }
+
+    .email-field {
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 1px solid #1a1a1a;
+    }
+
+    .email-field label {
+      font-size: 11px;
+      opacity: 0.6;
+      text-transform: none;
+      letter-spacing: 0;
+      font-weight: 500;
+    }
+
+    .email-field input {
+      font-size: 13px;
+      opacity: 0.8;
+    }
+
+    .submit-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--accent);
+      color: #000;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-top: 20px;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+
+    .submit-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+    .submit-btn:active { transform: translateY(0); }
+    .submit-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    .success-msg {
+      display: none;
+      background: rgba(0, 255, 136, 0.08);
+      border: 1px solid rgba(0, 255, 136, 0.25);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-top: 20px;
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .success-msg a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .error-msg {
+      display: none;
+      background: rgba(255, 80, 80, 0.08);
+      border: 1px solid rgba(255, 80, 80, 0.25);
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin-top: 20px;
+      color: #ff6b6b;
+      font-size: 13px;
+    }
+  </style>
+</head>
+<body>
+
+  <section class="hero" style="padding-bottom: 0; min-height: auto;">
+    <nav class="nav">
+      <a href="/" class="nav-logo" style="text-decoration:none; color: inherit;">LatencyGrid</a>
+      <div class="nav-links">
+        <a href="/#quickstart">Docs</a>
+        <a href="/regions">Regions</a>
+        <a href="/leaderboard">Leaderboard</a>
+        <a href="https://github.com/latencygrid/modelping" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </nav>
+  </section>
+
+  <main class="submit-page">
+    <div class="page-header">
+      <div class="page-badge">community</div>
+      <h1 class="page-title">Submit Your Benchmarks</h1>
+      <p class="page-sub">Run modelping and share your results. Your data helps the community understand real-world latency across regions.</p>
+    </div>
+
+    <!-- Option A: CLI -->
+    <div class="method-section">
+      <div class="method-label">
+        Option A — CLI <span class="badge">Recommended</span>
+      </div>
+      <div class="code-block">
+        <div><span class="comment"># Install modelping</span></div>
+        <div><span class="cmd">pip install</span> <span class="str">modelping</span></div>
+        <br/>
+        <div><span class="comment"># Run benchmarks and submit in one step</span></div>
+        <div><span class="cmd">modelping run</span> --all --json <span class="cmd">|</span> <span class="cmd">modelping submit</span> \</div>
+        <div>&nbsp;&nbsp;--region <span class="str">"us-east"</span> --location <span class="str">"New York, USA"</span></div>
+      </div>
+      <p class="code-note">⚠️ <code>modelping submit</code> is live — install the latest version to use it.</p>
+    </div>
+
+    <div class="divider">OR</div>
+
+    <!-- Option B: Form -->
+    <div class="method-section">
+      <div class="method-label">
+        Option B — Paste JSON <span class="badge soon">Manual</span>
+      </div>
+
+      <form class="submit-form" id="submitForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="region">Region</label>
+            <select id="region" name="region" required>
+              <option value="">Select region...</option>
+              <option value="us-east">US East</option>
+              <option value="us-west">US West</option>
+              <option value="eu-west">EU West</option>
+              <option value="asia-pacific">Asia Pacific</option>
+              <option value="canada">Canada</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="location">Location</label>
+            <input type="text" id="location" name="location" placeholder="e.g. San Francisco, USA" required />
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="jsonData">modelping JSON Output</label>
+          <textarea
+            id="jsonData"
+            name="jsonData"
+            placeholder='Paste output from: modelping run --all --json
+
+Example:
+[
+  {
+    "model": "gpt-4o-mini",
+    "provider": "openai",
+    "p50_ttft_ms": 312,
+    "p95_ttft_ms": 489,
+    "p99_ttft_ms": 621,
+    "runs": 5,
+    "errors": 0
+  }
+]'
+            required
+          ></textarea>
+        </div>
+
+        <div class="email-field">
+          <label for="email">Email (optional) — get notified when your region leaderboard goes live</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" />
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">
+          Submit Results
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+            <polyline points="12 5 19 12 12 19"></polyline>
+          </svg>
+        </button>
+
+        <div class="success-msg" id="successMsg">
+          ✓ Results submitted! <a href="/leaderboard" id="leaderboardLink">View on leaderboard →</a>
+        </div>
+
+        <div class="error-msg" id="errorMsg"></div>
+      </form>
+    </div>
+  </main>
+
+  <script>
+    document.getElementById('submitForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      const btn = document.getElementById('submitBtn');
+      const successMsg = document.getElementById('successMsg');
+      const errorMsg = document.getElementById('errorMsg');
+
+      btn.disabled = true;
+      btn.textContent = 'Submitting...';
+      successMsg.style.display = 'none';
+      errorMsg.style.display = 'none';
+
+      const region = document.getElementById('region').value;
+      const location = document.getElementById('location').value;
+      const email = document.getElementById('email').value;
+      const jsonData = document.getElementById('jsonData').value.trim();
+
+      let parsedData;
+      try {
+        parsedData = JSON.parse(jsonData);
+      } catch (err) {
+        errorMsg.textContent = 'Invalid JSON — please paste valid modelping JSON output.';
+        errorMsg.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = 'Submit Results <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+        return;
+      }
+
+      const payload = {
+        region,
+        location,
+        timestamp: new Date().toISOString(),
+        modelping_version: 'web-form',
+        llm: Array.isArray(parsedData) ? parsedData : [],
+      };
+      if (email) payload.email = email;
+
+      try {
+        const resp = await fetch('https://api.latencygrid.dev/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await resp.json();
+
+        if (data.success) {
+          successMsg.style.display = 'block';
+          document.getElementById('leaderboardLink').href = data.url || '/leaderboard';
+          document.getElementById('submitForm').reset();
+        } else {
+          errorMsg.textContent = 'Submission failed: ' + (data.error || 'Unknown error');
+          errorMsg.style.display = 'block';
+        }
+      } catch (err) {
+        errorMsg.textContent = 'Network error — please try again. ' + err.message;
+        errorMsg.style.display = 'block';
+      }
+
+      btn.disabled = false;
+      btn.innerHTML = 'Submit Results <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>';
+    });
+  </script>
+
+</body>
+</html>
