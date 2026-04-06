@@ -475,21 +475,28 @@ td.model-name {
 /* ===== MATRIX SECTION ===== */
 .matrix-controls {
   display: flex;
+  gap: 16px;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
   flex-wrap: wrap;
+  margin-bottom: 20px;
 }
 
-.matrix-controls label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.matrix-control-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.matrix-lbl {
   font-size: 11px;
+  font-weight: 600;
+  color: #52525b;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  white-space: nowrap;
 }
 
+.matrix-select,
 .llm-select {
   background: var(--surface);
   border: 1px solid var(--border);
@@ -505,18 +512,32 @@ td.model-name {
   background-repeat: no-repeat;
   background-position: right 10px center;
   transition: border-color 0.15s;
-  min-width: 220px;
+  min-width: 180px;
 }
 
+.matrix-select:focus,
 .llm-select:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 2px rgba(0,229,255,0.15);
 }
 
+.matrix-select option,
 .llm-select option {
   background: #1a1a1e;
   color: var(--text-primary);
+}
+
+.matrix-cell.selected {
+  background: rgba(0, 229, 255, 0.12) !important;
+  color: #00e5ff !important;
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px rgba(0, 229, 255, 0.4);
+}
+
+.matrix-row.highlighted > td,
+.matrix-col-highlighted {
+  background: rgba(0, 229, 255, 0.04);
 }
 
 /* Matrix table specifics */

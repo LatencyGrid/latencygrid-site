@@ -51,6 +51,7 @@
     </button>
     <ul class="nav-links" id="navLinks">
       <li><a href="/leaderboard.html">Leaderboard</a></li>
+      <li><a href="/submit">Submit</a></li>
       <li><a href="#matrix">Stack Builder</a></li>
       <li><a href="/benchmark.html">Request Benchmark</a></li>
       <li>
@@ -120,7 +121,7 @@
   <div class="container">
     <div class="section-header">
       <h2 class="section-title">Benchmark Results</h2>
-      <p class="section-sub">Real measurements. No synthetic tests. Run with modelping.</p>
+      <p class="section-sub">Best results across all regions. Run with modelping.</p>
     </div>
 
     <div class="meta-strip">
@@ -448,27 +449,55 @@
     </div>
 
     <div class="matrix-controls">
-      <label for="llmSelect">LLM</label>
-      <select class="llm-select" id="llmSelect">
-        <option value="109" data-label="groq/kimi-k2">Groq kimi-k2 (109ms)</option>
-        <option value="114" data-label="groq/llama-3.1-8b-instant">Groq Llama 3.1 8B (114ms)</option>
-        <option value="140" data-label="groq/llama-3.3-70b-versatile" selected>Groq Llama 3.3 70B (140ms)</option>
-        <option value="380" data-label="openai/gpt-4o">GPT-4o (380ms)</option>
-        <option value="463" data-label="anthropic/claude-haiku-4-5">Claude Haiku 4.5 (463ms)</option>
-        <option value="508" data-label="openai/gpt-4o-mini">GPT-4o-mini (508ms)</option>
-        <option value="936" data-label="google/gemini-2.5-flash">Gemini 2.5 Flash (936ms)</option>
-      </select>
+      <div class="matrix-control-group">
+        <label class="matrix-lbl">STT</label>
+        <select id="sttSelect" class="matrix-select">
+          <option value="360" data-model="groq/whisper-large-v3" selected>Groq Whisper (360ms)</option>
+          <option value="527" data-model="groq/whisper-large-v3-turbo">Groq Whisper Turbo (527ms)</option>
+          <option value="583" data-model="deepgram/nova-3">Deepgram Nova-3 (583ms)</option>
+          <option value="622" data-model="deepgram/nova-2">Deepgram Nova-2 (622ms)</option>
+          <option value="799" data-model="openai/whisper">OpenAI Whisper (799ms)</option>
+          <option value="1725" data-model="assemblyai/universal-2">AssemblyAI Universal-2 (1725ms)</option>
+        </select>
+      </div>
+
+      <div class="matrix-control-group">
+        <label class="matrix-lbl">LLM</label>
+        <select id="llmSelect" class="matrix-select">
+          <option value="109" data-model="groq/kimi-k2" selected>Groq kimi-k2 (109ms)</option>
+          <option value="114" data-model="groq/llama-3.1-8b">Groq Llama 3.1 8B (114ms)</option>
+          <option value="140" data-model="groq/llama-3.3-70b">Groq Llama 3.3 70B (140ms)</option>
+          <option value="380" data-model="openai/gpt-4o">GPT-4o (380ms)</option>
+          <option value="463" data-model="anthropic/claude-haiku">Claude Haiku 4.5 (463ms)</option>
+          <option value="508" data-model="openai/gpt-4o-mini">GPT-4o-mini (508ms)</option>
+          <option value="936" data-model="google/gemini-2.5-flash">Gemini 2.5 Flash (936ms)</option>
+        </select>
+      </div>
+
+      <div class="matrix-control-group">
+        <label class="matrix-lbl">TTS</label>
+        <select id="ttsSelect" class="matrix-select">
+          <option value="156" data-model="deepgram/aura-luna">Deepgram Luna (156ms)</option>
+          <option value="200" data-model="cartesia/sonic-2" selected>Cartesia Sonic-2 (200ms)</option>
+          <option value="298" data-model="lmnt/aurora">LMNT Aurora (298ms)</option>
+          <option value="310" data-model="lmnt/blizzard">LMNT Blizzard (310ms)</option>
+          <option value="374" data-model="elevenlabs/flash">ElevenLabs Flash (374ms)</option>
+          <option value="1050" data-model="openai/tts-1">OpenAI TTS-1 (1050ms)</option>
+        </select>
+      </div>
     </div>
 
     <div class="matrix-table-wrapper">
       <table class="matrix-table" id="matrixTable">
-        <thead>
+        <thead id="matrixHead">
           <tr>
             <th>STT \ TTS</th>
-            <th>Cartesia Sonic-2<br><span style="font-weight:400;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">200ms</span></th>
             <th>Deepgram Luna<br><span style="font-weight:400;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">156ms</span></th>
-            <th>ElevenLabs Flash<br><span style="font-weight:400;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">374ms</span></th>
+            <th>Cartesia Sonic-2<br><span style="font-weight:400;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">200ms</span></th>
             <th>LMNT Aurora<br><span style="font-weight:400;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">298ms</span></th>
+            <th>LMNT Blizzard<br><span style="font-weight:400;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">310ms</span></th>
+            <th>ElevenLabs Flash<br><span style="font-weight:400;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">374ms</span></th>
+            <th>OpenAI TTS-1<br><span style="font-weight:400;font-family:var(--font-mono);font-size:11px;color:var(--text-muted)">1050ms</span></th>
           </tr>
         </thead>
         <tbody id="matrixBody">
@@ -478,16 +507,17 @@
     </div>
 
     <div class="matrix-fastest-line" id="matrixFastestLine">
-      Fastest: <strong id="fastestLabel">—</strong>
+      Fastest: <strong id="fastestLabel">—</strong><br>
+      Your stack: <strong id="yourStackLabel">—</strong>
     </div>
 
     <div class="command-block">
       <div class="command-text" id="commandText">
         <span class="cmd-binary">modelping</span>
         <span class="cmd-flag"> pipeline</span>
-        <span class="cmd-flag"> --stt </span><span class="cmd-value">groq/whisper-large-v3</span>
-        <span class="cmd-flag"> --llm </span><span id="cmdLlmValue" class="cmd-value">groq/llama-3.3-70b-versatile</span>
-        <span class="cmd-flag"> --tts </span><span class="cmd-value">cartesia/sonic-2</span>
+        <span class="cmd-flag"> --stt </span><span id="cmdSttValue" class="cmd-value">groq/whisper-large-v3</span>
+        <span class="cmd-flag"> --llm </span><span id="cmdLlmValue" class="cmd-value">groq/kimi-k2</span>
+        <span class="cmd-flag"> --tts </span><span id="cmdTtsValue" class="cmd-value">cartesia/sonic-2</span>
       </div>
       <button class="copy-btn" id="copyBtn">
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -684,23 +714,22 @@
   });
 
   // ===== MATRIX =====
-  const sttProviders = [
-    { label: 'Groq Whisper', ms: 360 },
-    { label: 'Deepgram Nova-3', ms: 583 },
-    { label: 'OpenAI Whisper', ms: 799 }
+  const sttOptions = [
+    { label: 'Groq Whisper', ms: 360, cmdKey: 'groq/whisper-large-v3' },
+    { label: 'Groq Whisper Turbo', ms: 527, cmdKey: 'groq/whisper-large-v3-turbo' },
+    { label: 'Deepgram Nova-3', ms: 583, cmdKey: 'deepgram/nova-3' },
+    { label: 'Deepgram Nova-2', ms: 622, cmdKey: 'deepgram/nova-2' },
+    { label: 'OpenAI Whisper', ms: 799, cmdKey: 'openai/whisper' },
+    { label: 'AssemblyAI Universal-2', ms: 1725, cmdKey: 'assemblyai/universal-2' }
   ];
 
-  const ttsProviders = [
+  const ttsOptions = [
+    { label: 'Deepgram Luna', ms: 156, cmdKey: 'deepgram/aura-luna' },
     { label: 'Cartesia Sonic-2', ms: 200, cmdKey: 'cartesia/sonic-2' },
-    { label: 'Deepgram Luna', ms: 156, cmdKey: 'deepgram/aura-luna-en' },
-    { label: 'ElevenLabs Flash', ms: 374, cmdKey: 'elevenlabs/flash-v2.5' },
-    { label: 'LMNT Aurora', ms: 298, cmdKey: 'lmnt/aurora' }
-  ];
-
-  const sttCmdKeys = [
-    'groq/whisper-large-v3',
-    'deepgram/nova-3',
-    'openai/whisper-1'
+    { label: 'LMNT Aurora', ms: 298, cmdKey: 'lmnt/aurora' },
+    { label: 'LMNT Blizzard', ms: 310, cmdKey: 'lmnt/blizzard' },
+    { label: 'ElevenLabs Flash', ms: 374, cmdKey: 'elevenlabs/flash' },
+    { label: 'OpenAI TTS-1', ms: 1050, cmdKey: 'openai/tts-1' }
   ];
 
   function getThresholds(values) {
@@ -716,13 +745,24 @@
     return '#fafafa';
   }
 
+  function getSelectedMs(selectId) {
+    return parseInt(document.getElementById(selectId).value, 10);
+  }
+
+  function getSelectedModel(selectId) {
+    const sel = document.getElementById(selectId);
+    const opt = sel.options[sel.selectedIndex];
+    return opt.getAttribute('data-model') || '';
+  }
+
   function renderMatrix(llmMs) {
+    const sttMs = getSelectedMs('sttSelect');
+    const ttsMs = getSelectedMs('ttsSelect');
     const tbody = document.getElementById('matrixBody');
-    const cells = [];
 
     // Compute all values
-    const rows = sttProviders.map(function(stt) {
-      return ttsProviders.map(function(tts) {
+    const rows = sttOptions.map(function(stt) {
+      return ttsOptions.map(function(tts) {
         return stt.ms + llmMs + tts.ms;
       });
     });
@@ -736,25 +776,35 @@
 
     tbody.innerHTML = '';
     rows.forEach(function(rowVals, si) {
+      const sttRowMs = sttOptions[si].ms;
+      const isSelectedRow = (sttRowMs === sttMs);
       const tr = document.createElement('tr');
+      if (isSelectedRow) tr.className = 'matrix-row highlighted';
+
       const th = document.createElement('td');
       th.className = 'row-header';
-      th.textContent = sttProviders[si].label;
+      th.textContent = sttOptions[si].label;
       tr.appendChild(th);
 
       rowVals.forEach(function(val, ti) {
-        const td = document.createElement('td');
+        const ttsColMs = ttsOptions[ti].ms;
+        const isSelectedCol = (ttsColMs === ttsMs);
+        const isSelectedCell = (isSelectedRow && isSelectedCol);
         const isMin = (val === minVal);
+        const td = document.createElement('td');
 
-        if (isMin) {
+        if (isSelectedCell) {
+          td.className = 'matrix-cell selected';
+        } else if (isMin) {
           td.className = 'cell-fastest';
           td.style.color = '#00e5ff';
-          fastestStt = sttProviders[si].label;
-          fastestTts = ttsProviders[ti].label;
+          fastestStt = sttOptions[si].label;
+          fastestTts = ttsOptions[ti].label;
           fastestTotal = val;
-          fastestSttCmd = sttCmdKeys[si];
-          fastestTtsCmd = ttsProviders[ti].cmdKey;
+          fastestSttCmd = sttOptions[si].cmdKey;
+          fastestTtsCmd = ttsOptions[ti].cmdKey;
         } else {
+          if (isSelectedCol) td.className = 'matrix-col-highlighted';
           td.style.color = colorCell(val, low, high);
         }
         td.style.fontFamily = 'var(--font-mono)';
@@ -765,52 +815,62 @@
       tbody.appendChild(tr);
     });
 
+    // If nothing else is min (edge case: selected cell is the min)
+    if (!fastestStt) {
+      for (let si = 0; si < rows.length; si++) {
+        for (let ti = 0; ti < rows[si].length; ti++) {
+          if (rows[si][ti] === minVal) {
+            fastestStt = sttOptions[si].label;
+            fastestTts = ttsOptions[ti].label;
+            fastestTotal = minVal;
+            fastestSttCmd = sttOptions[si].cmdKey;
+            fastestTtsCmd = ttsOptions[ti].cmdKey;
+          }
+        }
+      }
+    }
+
+    // Your stack total
+    const yourStackTotal = sttMs + llmMs + ttsMs;
+
     // Update fastest line
     document.getElementById('fastestLabel').textContent =
       fastestStt + ' + LLM + ' + fastestTts + ' = ' + fastestTotal + 'ms';
 
+    // Update your stack line
+    const sttSel = document.getElementById('sttSelect');
+    const ttsSel = document.getElementById('ttsSelect');
+    const llmSel = document.getElementById('llmSelect');
+    const sttLabel = sttSel.options[sttSel.selectedIndex].text.replace(/ \(\d+ms\)$/, '');
+    const ttsLabel = ttsSel.options[ttsSel.selectedIndex].text.replace(/ \(\d+ms\)$/, '');
+    const llmLabel = llmSel.options[llmSel.selectedIndex].text.replace(/ \(\d+ms\)$/, '');
+    document.getElementById('yourStackLabel').textContent =
+      sttLabel + ' + ' + llmLabel + ' + ' + ttsLabel + ' = ' + yourStackTotal + 'ms';
+
     return { fastestSttCmd, fastestTtsCmd };
   }
 
-  function getLlmLabel(select) {
-    const opt = select.options[select.selectedIndex];
-    return opt.getAttribute('data-label') || 'groq/llama-3.3-70b-versatile';
+  function getModelFromSelect(selectId) {
+    const sel = document.getElementById(selectId);
+    return sel.options[sel.selectedIndex].getAttribute('data-model') || '';
   }
 
-  function updateCommand(llmLabel, ttsCmd) {
-    const cmdLlmValue = document.getElementById('cmdLlmValue');
-    cmdLlmValue.textContent = llmLabel;
+  function updateCommand() {
+    document.getElementById('cmdSttValue').textContent = getModelFromSelect('sttSelect');
+    document.getElementById('cmdLlmValue').textContent = getModelFromSelect('llmSelect');
+    document.getElementById('cmdTtsValue').textContent = getModelFromSelect('ttsSelect');
   }
 
   function updateMatrix() {
-    const select = document.getElementById('llmSelect');
-    const llmMs = parseInt(select.value, 10);
-    const llmLabel = getLlmLabel(select);
-    const { fastestSttCmd, fastestTtsCmd } = renderMatrix(llmMs);
-    updateCommand(llmLabel, fastestTtsCmd);
-
-    // Update URL param
-    const url = new URL(window.location.href);
-    // URL stays clean — no query params
+    const llmMs = getSelectedMs('llmSelect');
+    renderMatrix(llmMs);
+    updateCommand();
     history.replaceState(null, '', window.location.pathname);
   }
 
-  // Init from URL param
-  (function initFromUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const llmParam = params.get('llm');
-    if (llmParam) {
-      const select = document.getElementById('llmSelect');
-      for (let i = 0; i < select.options.length; i++) {
-        if (select.options[i].getAttribute('data-label') === llmParam) {
-          select.selectedIndex = i;
-          break;
-        }
-      }
-    }
-  })();
-
   document.getElementById('llmSelect').addEventListener('change', updateMatrix);
+  document.getElementById('sttSelect').addEventListener('change', updateMatrix);
+  document.getElementById('ttsSelect').addEventListener('change', updateMatrix);
   updateMatrix();
 
   // ===== LIVE DATA FETCHING =====
@@ -1033,7 +1093,7 @@
       if (heroLocEl) heroLocEl.textContent = sub.location || '';
 
       // Metadata strip
-      document.getElementById('metaLocation').textContent = sub.location || '';
+      document.getElementById('metaLocation').textContent = 'Global · best per model';
       document.getElementById('metaDate').textContent = formatDate(sub.timestamp);
       document.getElementById('metaRuns').textContent = (llm[0] && llm[0].runs ? llm[0].runs : 5) + ' runs';
       document.getElementById('metaVersion').textContent = 'modelping ' + (sub.modelping_version || 'v0.1.0');
@@ -1112,18 +1172,69 @@
         var res = await fetch(API_BASE + '/results');
         if (!res.ok) throw new Error('HTTP ' + res.status);
         var data = await res.json();
-        if (!data.success || !data.submissions || !data.submissions.length) throw new Error('No submissions');
+        if (!data.success || !data.submissions || !data.submissions.length) throw new Error('No data');
 
-        var best = findBestSubmission(data.submissions);
-        if (!best) throw new Error('No best submission');
+        // Fetch details for up to 3 most complete submissions
+        var topSubs = data.submissions
+          .filter(function(s) { return s.llm_count > 0; })
+          .slice(0, 3);
 
-        var detailRes = await fetch(API_BASE + '/results/' + best.id);
-        if (!detailRes.ok) throw new Error('Detail HTTP ' + detailRes.status);
-        var detailData = await detailRes.json();
-        if (!detailData.success || !detailData.submission) throw new Error('No submission detail');
+        var details = await Promise.all(
+          topSubs.map(function(s) { return fetch(API_BASE + '/results/' + s.id).then(function(r) { return r.json(); }); })
+        );
+
+        // Merge: build best-per-model maps
+        var llmMap = {}; // model -> best result (lowest ttft_p50)
+        var sttMap = {}; // model -> best result (lowest latency_p50)
+        var ttsMap = {}; // model -> best result (lowest ttfb_p50)
+
+        for (var i = 0; i < details.length; i++) {
+          var sub = details[i].submission;
+          if (!sub) continue;
+
+          var llmArr = sub.llm || [];
+          for (var j = 0; j < llmArr.length; j++) {
+            var m = llmArr[j];
+            if (m.error_rate >= 1) continue;
+            if (!llmMap[m.model] || m.ttft_p50 < llmMap[m.model].ttft_p50) {
+              llmMap[m.model] = Object.assign({}, m, { _location: sub.location });
+            }
+          }
+          var sttArr = sub.stt || [];
+          for (var j = 0; j < sttArr.length; j++) {
+            var m = sttArr[j];
+            var lat = m.latency_p50 != null ? m.latency_p50 : m.transcription_latency_ms;
+            if (!lat) continue;
+            var prevLat = sttMap[m.model] ? (sttMap[m.model].latency_p50 != null ? sttMap[m.model].latency_p50 : sttMap[m.model].transcription_latency_ms) : null;
+            if (!sttMap[m.model] || lat < prevLat) {
+              sttMap[m.model] = Object.assign({}, m, { latency_p50: lat, _location: sub.location });
+            }
+          }
+          var ttsArr = sub.tts || [];
+          for (var j = 0; j < ttsArr.length; j++) {
+            var m = ttsArr[j];
+            var ttfb = m.ttfb_p50 != null ? m.ttfb_p50 : m.ttfb_ms;
+            if (!ttfb) continue;
+            var prevTtfb = ttsMap[m.model] ? (ttsMap[m.model].ttfb_p50 != null ? ttsMap[m.model].ttfb_p50 : ttsMap[m.model].ttfb_ms) : null;
+            if (!ttsMap[m.model] || ttfb < prevTtfb) {
+              ttsMap[m.model] = Object.assign({}, m, { ttfb_p50: ttfb, _location: sub.location });
+            }
+          }
+        }
+
+        var llm = Object.values(llmMap);
+        var stt = Object.values(sttMap);
+        var tts = Object.values(ttsMap);
 
         clearLoading();
-        applySubmissionData(detailData.submission);
+
+        // Use the most recent submission with pipeline data for metadata
+        var metaSub = details
+          .map(function(d) { return d.submission; })
+          .filter(Boolean)
+          .sort(function(a, b) { return new Date(b.timestamp) - new Date(a.timestamp); })[0];
+
+        if (metaSub) applySubmissionData(Object.assign({}, metaSub, { llm: llm, stt: stt, tts: tts }));
       } catch(err) {
         console.error('[LatencyGrid] Live data fetch failed:', err);
         clearLoading();
@@ -1136,9 +1247,10 @@
 
   // ===== COPY TO CLIPBOARD =====
   document.getElementById('copyBtn').addEventListener('click', function() {
-    const select = document.getElementById('llmSelect');
-    const llmLabel = getLlmLabel(select);
-    const cmd = 'modelping pipeline --stt groq/whisper-large-v3 --llm ' + llmLabel + ' --tts cartesia/sonic-2';
+    const sttVal = getModelFromSelect('sttSelect');
+    const llmVal = getModelFromSelect('llmSelect');
+    const ttsVal = getModelFromSelect('ttsSelect');
+    const cmd = 'modelping pipeline --stt ' + sttVal + ' --llm ' + llmVal + ' --tts ' + ttsVal;
     navigator.clipboard.writeText(cmd).then(function() {
       const btn = document.getElementById('copyBtn');
       btn.classList.add('copied');
