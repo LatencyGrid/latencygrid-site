@@ -93,7 +93,7 @@
     <div class="hero-stats hero-stats-4">
       <!-- Fastest pipeline -->
       <div class="stat-card">
-        <div class="stat-number cyan" id="heroFastestPipeline">697ms</div>
+        <div class="stat-number cyan" id="heroFastestPipeline">—</div>
         <div class="stat-label-row">
           <div class="live-dot"></div>
           <div class="stat-label">Fastest Pipeline E2E</div>
@@ -1153,12 +1153,13 @@
       renderSTTTable(stt);
       renderTTSTable(tts);
 
-      // Pipeline tab — update from live data if available
+      // Pipeline tab — merge pipeline results across all submissions passed in
       var pipeline = sub.pipeline || [];
       if (pipeline.length) {
         var best = pipeline.reduce(function(a, b) {
           return a.total_pipeline_ms < b.total_pipeline_ms ? a : b;
         });
+
         // Update route label
         var routeEl = document.querySelector('.pipeline-route');
         if (routeEl) {
@@ -1212,10 +1213,17 @@
         var data = await res.json();
         if (!data.success || !data.submissions || !data.submissions.length) throw new Error('No data');
 
-        // Fetch details for up to 3 most complete submissions
-        var topSubs = data.submissions
-          .filter(function(s) { return s.llm_count > 0; })
-          .slice(0, 3);
+        // Prefer submissions from the last 24h; fall back to all-time if nothing recent
+        var now = Date.now();
+        var recent = data.submissions.filter(function(s) {
+          return (now - new Date(s.timestamp).getTime()) < 86400000;
+        });
+        var pool = recent.length >= 3 ? recent : data.submissions;
+
+        // Fetch details for up to 5 most complete submissions from pool
+        var topSubs = pool
+          .filter(function(s) { return s.fastest_llm_ms != null; })
+          .slice(0, 5);
 
         var details = await Promise.all(
           topSubs.map(function(s) { return fetch(API_BASE + '/results/' + s.id).then(function(r) { return r.json(); }); })
@@ -1266,13 +1274,18 @@
 
         clearLoading();
 
-        // Use the most recent submission with pipeline data for metadata
-        var metaSub = details
-          .map(function(d) { return d.submission; })
-          .filter(Boolean)
-          .sort(function(a, b) { return new Date(b.timestamp) - new Date(a.timestamp); })[0];
+        // Use the most recent submission for metadata/date display
+        var allSubs = details.map(function(d) { return d.submission; }).filter(Boolean);
+        var metaSub = allSubs.sort(function(a, b) { return new Date(b.timestamp) - new Date(a.timestamp); })[0];
 
-        if (metaSub) applySubmissionData(Object.assign({}, metaSub, { llm: llm, stt: stt, tts: tts }));
+        // Merge pipeline entries across all submissions, pick best total_pipeline_ms
+        var allPipeline = [];
+        for (var i = 0; i < allSubs.length; i++) {
+          var p = allSubs[i].pipeline || [];
+          allPipeline = allPipeline.concat(p);
+        }
+
+        if (metaSub) applySubmissionData(Object.assign({}, metaSub, { llm: llm, stt: stt, tts: tts, pipeline: allPipeline }));
       } catch(err) {
         console.error('[LatencyGrid] Live data fetch failed:', err);
         clearLoading();
